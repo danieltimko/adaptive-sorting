@@ -2,16 +2,31 @@ import numpy as np
 import random
 
 
+# TODO move to utils
 def calc_entropy(run_profile):
     arr = np.array(run_profile) / sum(run_profile)
     return -np.sum(arr * np.log2(arr))
+
+
+def calc_entropy_bounds(arr_len, arr_sum):
+    # max entropy is log(k) by definition, where k is number of runs
+    max_entropy = np.log2(arr_len)
+    # min entropy is when the profile is most skewed, like this [2,2,...,2,2,X] where X is the remainder
+    # note that min run size is 2
+    x = arr_sum - 2*(arr_len-1)  # value of X (remainder)
+    n2 = 2 / arr_sum  # normalized value of 2
+    nx = x / arr_sum  # normalized value of X
+    e2 = -n2 * np.log2(n2)  # entropy "contribution" of a single 2
+    ex = -nx * np.log2(nx)  # entropy "contribution" of X
+    min_entropy = ex + e2*(arr_len-1)
+    return min_entropy, max_entropy
 
 
 def generate_random_list(n, bounds, number_of_runs=None, run_profile=None):
     if number_of_runs or run_profile:
         # Get run profile (random array [1..n_runs] summing to <size>)
         if number_of_runs:
-            prof = _generate_random_run_profile(n, number_of_runs)
+            prof = generate_random_run_profile(n, number_of_runs)
         else:
             prof = run_profile
         arr = []
@@ -30,18 +45,7 @@ def generate_random_list(n, bounds, number_of_runs=None, run_profile=None):
     return np.random.randint(bounds[0], bounds[1], n).tolist()
 
 
-def _generate_run_profile(n, q):
-    runs = []
-    run_size = n // q
-    remainder = n % q
-    for i in range(q):
-        runs.append(run_size)
-    if remainder:
-        runs[-1] += remainder
-    return runs
-
-
-def _generate_random_run_profile(n, q):
+def generate_random_run_profile(n, q):
     runs = [2] * q  # minimal size of a run is 2
     for _ in range(n-q*2):
         i = random.randint(0, q-1)
