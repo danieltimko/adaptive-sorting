@@ -114,32 +114,47 @@ def benchmark_minrun_impact_cpu_time(min_size, max_size, skip_factor, reps):
     return [results]
 
 
-N_SAMPLES = 10  # TODO more
-SIZE_CONFIGURATIONS = {
+PROD_N_SAMPLES = 10  # TODO more
+PROD_SIZE_CONFIGURATIONS = {
     "small": [n for n in range(10, 101, 10)],
     "medium": [n for n in range(1000, 10_001, 1000)],
     "large": [n for n in range(100_000, 1_000_001, 100_000)]
 }
-RUNS_CONFIGURATIONS = {
+PROD_RUNS_CONFIGURATIONS = {
     # TODO explain these values
     "random": 2,
     "presorted": 20,
     "heavily_presorted": 200,
 }
-# ENTROPY_CONFIGURATIONS = {
-#     # TODO it's important to understand what distribution does this have, in other to define these categories
-#     # TODO is this a normal distribution? actually, I think it's converging toward 1.
-#     "very_skewed": (.1, .2),  # 10% of logK
-#     "partially_uniform": (.4, .6),  # 40-60% of logK
-#     "heavily_uniform": (.9, 1.),  # 90-100% of logK
-# }
+
+N_SAMPLES = 10
+SIZE_CONFIGURATIONS = {
+    # "s1": [n for n in range(10, 100, 10)],
+    "s2": [n for n in range(100, 1000, 100)],
+    "s3": [n for n in range(1000, 10_000, 1000)],
+    "s4": [n for n in range(10_000, 100_000, 10_000)],
+    # "s5": [n for n in range(100_000, 1_000_000, 100_000)]
+}
+
+RUNS_CONFIGURATIONS = {
+    "random": 2,
+    "presorted": 20,
+    "heavily_presorted": 200,
+}
+
+ENTROPY_CONFIGURATIONS = {
+    # TODO it's important to understand what distribution does this have, in other to define these categories
+    # TODO is this a normal distribution? actually, I think it's converging toward 1.
+    "very_skewed": (.1, .2),  # 10-20% of logK
+    "partially_uniform": (.4, .6),  # 40-60% of logK
+    "heavily_uniform": (.9, 1.),  # 90-100% of logK
+}
 
 
 # arr_size vs. cpu time with and without minrun + insertion sorting
 def benchmark_minrun_impact():
-    results = []
+    results = {}
     for arr_sizes in SIZE_CONFIGURATIONS.values():
-        subresults = {}
         for arr_size in arr_sizes:
             print(arr_size)
             bounds = (0, arr_size*10)  # TODO?
@@ -149,8 +164,7 @@ def benchmark_minrun_impact():
                 (_, n_with), _ = run_powersort(arr.copy(), fix_minrun=True)
                 (_, n_without), _ = run_powersort(arr.copy(), fix_minrun=False)
                 sum_with += (n_with-n_without)/n_without
-            subresults[arr_size] = (0, sum_with/N_SAMPLES)
-        results.append(subresults)
+            results[arr_size] = (0, sum_with/N_SAMPLES)
 
     plot_minrun_results(results, "Array size", "# of key comparisons [% diff from Merge Sort]",
                         "Performance impact of MIN_RUN and using insertion sort for small runs",
@@ -159,9 +173,8 @@ def benchmark_minrun_impact():
 
 
 def benchmark_random():
-    results = []
+    results = {}
     for arr_sizes in SIZE_CONFIGURATIONS.values():
-        subresults = {}
         for arr_size in arr_sizes:
             print(arr_size)
             bounds = (0, arr_size*10)  # TODO?
@@ -183,12 +196,11 @@ def benchmark_random():
                 sum_timsort += delta(n_timsort)
                 sum_powersort += delta(n_powersort)
                 sum_python_sort += delta(n_python_sort)
-            subresults[arr_size] = (sum_merge_sort/N_SAMPLES,
+            results[arr_size] = (sum_merge_sort/N_SAMPLES,
                                     sum_natural_merge_sort/N_SAMPLES,
                                     sum_timsort/N_SAMPLES,
                                     sum_powersort/N_SAMPLES,
                                     sum_python_sort/N_SAMPLES)
-        results.append(subresults)
     file_name = "benchmark_random"
     save_to_csv(results, file_name)
     plot_results(results, "Array size (N)", "# of key comparisons [% diff from Merge Sort]",
@@ -203,9 +215,8 @@ def benchmark_runs():
 
 
 def _benchmark_runs(config_name, factor):
-    results = []
+    results = {}
     for arr_sizes in SIZE_CONFIGURATIONS.values():
-        subresults = {}
         for arr_size in arr_sizes:
             print(arr_size)
             bounds = (0, arr_size * 10)  # TODO?
@@ -230,12 +241,11 @@ def _benchmark_runs(config_name, factor):
                 sum_timsort += delta(n_timsort)
                 sum_powersort += delta(n_powersort)
                 sum_python_sort += delta(n_python_sort)
-            subresults[arr_size] = (sum_merge_sort / N_SAMPLES,
-                                    sum_natural_merge_sort / N_SAMPLES,
-                                    sum_timsort / N_SAMPLES,
-                                    sum_powersort / N_SAMPLES,
-                                    sum_python_sort / N_SAMPLES)
-        results.append(subresults)
+            results[arr_size] = (sum_merge_sort / N_SAMPLES,
+                                 sum_natural_merge_sort / N_SAMPLES,
+                                 sum_timsort / N_SAMPLES,
+                                 sum_powersort / N_SAMPLES,
+                                 sum_python_sort / N_SAMPLES)
     file_name = f"benchmark_runs_{config_name}"
     save_to_csv(results, file_name)
     plot_results(results, "Array size (N)", "# of key comparisons [% diff from Merge Sort]",
@@ -244,94 +254,85 @@ def _benchmark_runs(config_name, factor):
     return results
 
 
-# def benchmark_entropy():
-#     for config_name, entropy_interval in ENTROPY_CONFIGURATIONS.items():
-#         _benchmark_entropy(config_name, entropy_interval)
-#
-#
-# def _benchmark_entropy(config_name, entropy_interval):
-#     """
-#     TODO the problem is that I the algorithms work with a different run profile (because of MIN_RUN=32)
-#     So
-#     Results from this might actually be kinda useless, unless the runs are really big?
-#     """
-#     entropy_from, entropy_to = entropy_interval
-#     results = []
-#     for arr_sizes in SIZE_CONFIGURATIONS.values():
-#         subresults = {}
-#         for arr_size in arr_sizes:
-#             print(arr_size)
-#             bounds = (0, arr_size * 10)  # TODO?
-#             sum_merge_sort = 0
-#             sum_natural_merge_sort = 0
-#             sum_timsort = 0
-#             sum_powersort = 0
-#             sum_python_sort = 0
-#             for _ in range(N_SAMPLES):
-#                 tries = 0
-#                 while True:
-#                     tries += 1
-#                     n_runs = random.randint(2, arr_size//2)
-#                     # print(arr_size, n_runs)
-#                     profile = generate_random_run_profile(arr_size, n_runs)
-#                     min_entropy, max_entropy = calc_entropy_bounds(n_runs, arr_size)
-#                     entropy = calc_entropy(profile)
-#                     # print(profile, entropy)
-#                     entropy_factor = (entropy-min_entropy) / (max_entropy-min_entropy)
-#                     # print(n_runs, arr_size)
-#                     # print(min_entropy, entropy, max_entropy)
-#                     print(entropy_factor)
-#                     # print(entropy_from, entropy_factor, entropy_to)
-#                     # print()
-#                     if entropy_from <= entropy_factor <= entropy_to:
-#                         break
-#                 print(f"{entropy_interval} successful after {tries} tries")
-#                 print(profile)
-#                 arr = generate_random_list(arr_size, bounds, run_profile=profile)
-#                 (_, n_merge_sort), _ = run_merge_sort(arr.copy())
-#                 (_, n_natural_merge_sort), _ = run_natural_merge_sort(arr.copy())
-#                 (_, n_timsort), _ = run_timsort(arr.copy())
-#                 (_, n_powersort), _ = run_powersort(arr.copy())
-#                 n_python_sort = run_python_sort_for_comparisons(arr.copy())
-#                 delta = lambda n: (n - n_merge_sort) / n_merge_sort
-#                 sum_merge_sort += delta(n_merge_sort)
-#                 sum_natural_merge_sort += delta(n_natural_merge_sort)
-#                 sum_timsort += delta(n_timsort)
-#                 sum_powersort += delta(n_powersort)
-#                 sum_python_sort += delta(n_python_sort)
-#             subresults[arr_size] = (sum_merge_sort / N_SAMPLES,
-#                                     sum_natural_merge_sort / N_SAMPLES,
-#                                     sum_timsort / N_SAMPLES,
-#                                     sum_powersort / N_SAMPLES,
-#                                     sum_python_sort / N_SAMPLES)
-#         results.append(subresults)
-#     file_name = f"benchmark_entropy_{config_name}"
-#     save_to_csv(results, file_name)
-#     plot_results(results, "Array size (N)", "# of key comparisons [% diff from Merge Sort]",
-#                  f"Array size vs. # of key comparisons (entropy interval is "
-#                  f"{entropy_interval[0]*100}%-{entropy_interval[1]*100}% => run profile is {config_name})",
-#                  file_name, fit_to_poly=True, show=False)
-#     return results
-#
-#
-# def _entropy_gen(arr_size, n_runs):
-#     # The idea is to generate run profiles with increasing entropy
-#     # Start with almost sorted array, and gradually balance it
-#     prof = [2] * (n_runs-1) + [arr_size-2*(n_runs-1)]
-#     i = 0
-#     while prof[i] < prof[-1]:
-#         prof[i] += 1
-#         prof[-1] -= 1
-#         yield prof
-#         i += 1
-#         if i == n_runs-1:
-#             i = 0
+def benchmark_entropy():
+    for config_name, entropy_interval in ENTROPY_CONFIGURATIONS.items():
+        _benchmark_entropy(config_name, entropy_interval)
+
+
+def _benchmark_entropy(config_name, entropy_interval):
+    """
+    TODO the problem is that the algorithms work with a different run profile (because of MIN_RUN=32)
+    So results from this might actually be kinda useless, unless the runs are really big?
+    => I think this is in fact not a problem, but let's see on results
+    """
+    entropy_from, entropy_to = entropy_interval
+    results = {}
+    for arr_sizes in SIZE_CONFIGURATIONS.values():
+        for arr_size in arr_sizes:
+            print(arr_size)
+            bounds = (0, arr_size * 10)  # TODO?
+            sum_merge_sort = 0
+            sum_natural_merge_sort = 0
+            sum_timsort = 0
+            sum_powersort = 0
+            sum_python_sort = 0
+            for _ in range(N_SAMPLES):
+                n_runs = random.randint(2, arr_size//2)  # TODO avg run size is 4 with this, change to //32 ?
+                min_entropy, max_entropy = calc_entropy_bounds(n_runs, arr_size)
+                # profiles = []
+                for profile in _entropy_gen(arr_size, n_runs):  # TODO add option to iterate from other direction too
+                    entropy = round(calc_entropy(profile), 4)
+                    entropy_factor = (entropy-min_entropy) / (max_entropy-min_entropy)  # TODO rename *factor*
+                    if entropy_from <= entropy_factor <= entropy_to:
+                        # profiles.append(prof)
+                        break
+                    # elif profiles:
+                    #     break
+                # prof = random.choice(profiles)
+
+                arr = generate_random_list(arr_size, bounds, run_profile=profile)
+                (_, n_merge_sort), _ = run_merge_sort(arr.copy())
+                (_, n_natural_merge_sort), _ = run_natural_merge_sort(arr.copy())
+                (_, n_timsort), _ = run_timsort(arr.copy())
+                (_, n_powersort), _ = run_powersort(arr.copy())
+                n_python_sort = run_python_sort_for_comparisons(arr.copy())
+                delta = lambda n: (n - n_merge_sort) / n_merge_sort
+                sum_merge_sort += delta(n_merge_sort)
+                sum_natural_merge_sort += delta(n_natural_merge_sort)
+                sum_timsort += delta(n_timsort)
+                sum_powersort += delta(n_powersort)
+                sum_python_sort += delta(n_python_sort)
+            results[arr_size] = (sum_merge_sort / N_SAMPLES,
+                                 sum_natural_merge_sort / N_SAMPLES,
+                                 sum_timsort / N_SAMPLES,
+                                 sum_powersort / N_SAMPLES,
+                                 sum_python_sort / N_SAMPLES)
+    file_name = f"benchmark_entropy_{config_name}"
+    save_to_csv(results, file_name)
+    plot_results(results, "Array size (N)", "# of key comparisons [% diff from Merge Sort]",
+                 f"Array size vs. # of key comparisons (entropy interval is "
+                 f"{entropy_interval[0]*100}%-{entropy_interval[1]*100}% => run profile is {config_name})",
+                 file_name, fit_to_poly=True, show=False)
+    return results
+
+
+def _entropy_gen(arr_size, n_runs):
+    # The idea is to generate run profiles with increasing entropy
+    # Start with almost sorted array, and gradually balance it
+    prof = [2] * (n_runs-1) + [arr_size-2*(n_runs-1)]
+    i = 0
+    while prof[i] < prof[-1]:
+        prof[i] += 1
+        prof[-1] -= 1
+        yield prof
+        i = (i+1) % (n_runs-1)
 
 
 def run_all_benchmarks():
     # benchmark_minrun_impact_cpu_time(100_000, 1_000_000, 10_000, 10)
-    benchmark_random()
-    benchmark_runs()
+    # benchmark_random()
+    # benchmark_runs()
+    benchmark_entropy()
 
 
 if __name__ == '__main__':
