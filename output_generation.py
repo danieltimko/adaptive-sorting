@@ -28,25 +28,17 @@ def save_to_csv(results: TResults, file_name: str) -> None:
             writer.writerow([arr_size, *data])
 
 
-def plot_minrun_results(data, x_label, y_label, title, file_name):
+def plot_minrun_results(data, x_label, y_label, title, file_name, xlog=False):
     plt.figure(figsize=(10, 6))
     x = list(data.keys())
     data_powersort_without_insertion_sort = [v[0] for v in data.values()]
     data_powersort_with_insertion_sort = [v[1] for v in data.values()]
 
-    try:
-        poly_without = np.poly1d(np.polyfit(x, data_powersort_without_insertion_sort, 5))
-        poly_with = np.poly1d(np.polyfit(x, data_powersort_with_insertion_sort, 5))
-    except np.RankWarning:
-        pass
+    plt.plot(x, data_powersort_without_insertion_sort, label='Powersort without MIN_RUN', color='orange', linewidth=3)
+    plt.plot(x, data_powersort_with_insertion_sort, label='Powersort with MIN_RUN=32', color='cyan', linewidth=3)
 
-    plt.plot(x, data_powersort_without_insertion_sort, color='orange', alpha=0.2)
-    plt.plot(x, data_powersort_with_insertion_sort, color='cyan', alpha=0.2)
-
-    plt.plot(x, poly_without(x), label='Powersort without MIN_RUN', color='orange', linewidth=3)
-    plt.plot(x, poly_with(x), label='Powersort with MIN_RUN=32', color='cyan', linewidth=3)
-
-    plt.xscale('log')
+    if xlog:
+        plt.xscale('log')
     plt.gca().yaxis.set_major_formatter(PercentFormatter(xmax=1))
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -73,6 +65,7 @@ def plot_results(data, x_label, y_label, title, file_name, fit_to_poly=True, sho
 
     if fit_to_poly:
         try:
+            # TODO play with 'deg' parameter; rn plots are too smooth on the first half of X axis (problem with xlog?)
             poly_merge_sort = np.poly1d(np.polyfit(x, data_merge_sort, 5))
             poly_natural_merge_sort = np.poly1d(np.polyfit(x, data_natural_merge_sort, 5))
             poly_timsort = np.poly1d(np.polyfit(x, data_timsort, 5))
