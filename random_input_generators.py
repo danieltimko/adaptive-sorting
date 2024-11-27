@@ -2,15 +2,15 @@ import numpy as np
 import random
 
 
-# TODO move to utils
-def calc_entropy(run_profile):
+# TODO move to utils?
+def _calc_entropy(run_profile):
     arr = np.array(run_profile) / sum(run_profile)
     return -np.sum(arr * np.log2(arr))
 
 
-def calc_entropy_bounds(arr_len, arr_sum):
+def _calc_entropy_bounds(arr_len, arr_sum):
     # max entropy is log(k) by definition, where k is number of runs
-    max_entropy = np.log2(arr_len)
+    max_entropy = np.log2(arr_len)  # FIXME take remainder into account
     # min entropy is when the profile is most skewed, like this [2,2,...,2,2,X] where X is the remainder
     # note that min run size is 2
     x = arr_sum - 2*(arr_len-1)  # value of X (remainder)
@@ -22,13 +22,28 @@ def calc_entropy_bounds(arr_len, arr_sum):
     return min_entropy, max_entropy
 
 
-def generate_random_list(n, bounds, number_of_runs=None, run_profile=None):
-    if number_of_runs or run_profile:
+def generate_random_list(n, bounds, number_of_runs=None, entropy_range=None):
+    # TODO docstring
+    if number_of_runs or entropy_range:
         # Get run profile (random array [1..n_runs] summing to <size>)
         if number_of_runs:
-            prof = generate_random_run_profile(n, number_of_runs)
+            prof = _generate_random_run_profile(n, number_of_runs)
         else:
-            prof = run_profile
+            # TODO move to separate function
+            profiles = []
+            # it could happen that we don't find run with desired entropy => try different n_runs
+            while not profiles:
+                n_runs = random.randint(2, n // 2)  # TODO avg run size is 4 with this, change to //32 ?
+                min_entropy, max_entropy = _calc_entropy_bounds(n_runs, n)
+                # TODO add option to iterate from other direction too? for faster execution
+                for profile in _generate_profiles_with_increasing_entropy(n, n_runs):
+                    entropy = round(_calc_entropy(profile), 4)
+                    entropy_factor = (entropy - min_entropy) / (max_entropy - min_entropy)  # TODO rename *factor*
+                    if entropy_range[0] <= entropy_factor <= entropy_range[1]:
+                        profiles.append(profile)
+                    elif profiles:
+                        break
+            prof = random.choice(profiles)
         arr = []
         last_increasing = True
         first_bounds = bounds
@@ -45,7 +60,7 @@ def generate_random_list(n, bounds, number_of_runs=None, run_profile=None):
     return np.random.randint(bounds[0], bounds[1], n).tolist()
 
 
-def generate_random_run_profile(n, q):
+def _generate_random_run_profile(n, q):
     runs = [2] * q  # minimal size of a run is 2
     for _ in range(n-q*2):
         i = random.randint(0, q-1)
@@ -70,3 +85,14 @@ def _generate_random_run(n, bounds, first_bounds):
             break
     return [first] + rest, increasing
 
+
+def _generate_profiles_with_increasing_entropy(arr_size, n_runs):
+    # The idea is to generate run profiles with increasing entropy
+    # Start with almost sorted array, and gradually balance it
+    prof = [2] * (n_runs-1) + [arr_size-2*(n_runs-1)]
+    i = 0
+    while prof[i] < prof[-1]:
+        prof[i] += 1
+        prof[-1] -= 1
+        yield prof
+        i = (i+1) % (n_runs-1)
