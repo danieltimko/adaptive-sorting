@@ -1,6 +1,7 @@
 from typing import List, TypeVar, Tuple
 
 
+# TODO
 T = TypeVar('T')
 
 
@@ -8,6 +9,10 @@ T = TypeVar('T')
 
 
 def powersort(arr: List[T], fix_minrun: bool = True) -> List[T]:
+    """
+    TODO
+    """
+
     n = len(arr)
     X = []
     P = []
@@ -30,6 +35,10 @@ def powersort(arr: List[T], fix_minrun: bool = True) -> List[T]:
 
 
 def find_next_run(arr: List[T], start: int, fix_minrun: bool = True) -> int:
+    """
+    TODO
+    """
+
     end = _find_next_run(arr, start)
     if fix_minrun:
         MIN_RUN = 32
@@ -41,6 +50,10 @@ def find_next_run(arr: List[T], start: int, fix_minrun: bool = True) -> int:
 
 
 def binary_insertion_sort(arr: List[T], left: int, right: int, m: int) -> None:
+    """
+    TODO
+    """
+
     for i in range(m+1, right+1):
         val = arr[i]
         j = binary_search(arr, val, left, i)
@@ -49,6 +62,10 @@ def binary_insertion_sort(arr: List[T], left: int, right: int, m: int) -> None:
 
 
 def binary_search(arr: List[T], val: T, start: int, end: int) -> int:
+    """
+    TODO
+    """
+
     while start < end:
         mid = (start+end) // 2
         if arr[mid] < val:
@@ -59,6 +76,10 @@ def binary_search(arr: List[T], val: T, start: int, end: int) -> int:
 
 
 def _find_next_run(arr: List[T], start: int) -> int:
+    """
+    TODO
+    """
+
     end = start
     while end < len(arr)-1 and arr[end] == arr[end+1]:
         end += 1
@@ -75,6 +96,10 @@ def _find_next_run(arr: List[T], start: int) -> int:
 
 
 def node_power(s1: int, e1: int, s2: int, e2: int, n: int) -> int:
+    """
+    TODO
+    """
+
     n1 = e1 - s1 + 1
     n2 = e2 - s2 + 1
     l = 0
@@ -86,6 +111,10 @@ def node_power(s1: int, e1: int, s2: int, e2: int, n: int) -> int:
 
 
 def merge(arr: List[T], left: int, mid: int, right: int) -> Tuple[int, int]:
+    """
+    TODO
+    """
+
     left_part = arr[left:mid+1]
     right_part = arr[mid+1:right+1]
     l, r = 0, 0

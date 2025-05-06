@@ -1,9 +1,14 @@
 from typing import TypeVar, List
 
+# TODO
 T = TypeVar('T')
 
 
 class Run:
+    """
+    TODO
+    """
+
     def __init__(self, low: int, high: int) -> None:
         self.low = low
         self.high = high
@@ -16,6 +21,10 @@ class Run:
 
 
 def timsort(arr: List[T]) -> List[T]:
+    """
+    TODO
+    """
+
     runs = find_runs(arr)
     S = []
     for run in runs:
@@ -59,6 +68,10 @@ def timsort(arr: List[T]) -> List[T]:
 
 
 def find_runs(arr: List[T]) -> List[Run]:
+    """
+    TODO
+    """
+
     MIN_RUN = 32
     runs = []
     i = 0
@@ -76,6 +89,10 @@ def find_runs(arr: List[T]) -> List[Run]:
 
 
 def find_next_natural_run(arr: List[T], start: int) -> int:
+    """
+    TODO
+    """
+
     end = start
     while end < len(arr)-1 and arr[end] == arr[end+1]:
         end += 1
@@ -92,6 +109,10 @@ def find_next_natural_run(arr: List[T], start: int) -> int:
 
 
 def binary_insertion_sort(arr: List[T], left: int, right: int, m: int) -> None:
+    """
+    TODO
+    """
+
     for i in range(m+1, right+1):
         val = arr[i]
         j = binary_search(arr, val, left, i)
@@ -100,6 +121,10 @@ def binary_insertion_sort(arr: List[T], left: int, right: int, m: int) -> None:
 
 
 def binary_search(arr: List[T], val: T, start: int, end: int) -> int:
+    """
+    TODO
+    """
+
     while start < end:
         mid = (start+end) // 2
         if arr[mid] < val:
@@ -110,6 +135,10 @@ def binary_search(arr: List[T], val: T, start: int, end: int) -> int:
 
 
 def merge(arr: List[T], left: int, mid: int, right: int) -> None:
+    """
+    TODO
+    """
+
     left_part = arr[left:mid+1]
     right_part = arr[mid+1:right+1]
     l, r = 0, 0

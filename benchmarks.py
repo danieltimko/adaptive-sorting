@@ -11,6 +11,9 @@ from random_input_generators import generate_random_list
 
 
 def timeit(func: Callable) -> Callable:
+    """
+    TODO
+    """
     def wrapper(*args, **kwargs):
         start_time = time.process_time()
         result = func(*args, **kwargs)
@@ -20,6 +23,10 @@ def timeit(func: Callable) -> Callable:
 
 
 class Comparable:
+    """
+    TODO
+    """
+
     # Static variable to track the number of comparisons
     comparison_count = 0
 
@@ -52,6 +59,10 @@ class Comparable:
 
 
 def run_python_sort_for_comparisons(arr: List) -> int:
+    """
+    TODO
+    """
+
     Comparable.comparison_count = 0
     wrapped_arr = [Comparable(x) for x in arr]
     sorted(wrapped_arr)
@@ -60,29 +71,52 @@ def run_python_sort_for_comparisons(arr: List) -> int:
 
 @timeit
 def run_timsort(arr: List) -> Tuple[List, int]:
+    """
+    TODO
+    """
+
     return timsort(arr)
 
 
 @timeit
 def run_powersort(arr: List, fix_minrun: bool = True) -> Tuple[List, int]:
+    """
+    TODO
+    """
+
     return powersort(arr, fix_minrun)
 
 
 @timeit
 def run_natural_merge_sort(arr: List) -> Tuple[List, int]:
+    """
+    TODO
+    """
+
     return natural_merge_sort(arr)
 
 
 @timeit
 def run_merge_sort(arr: List) -> Tuple[List, int]:
+    """
+    TODO
+    """
+
     return merge_sort(arr)
 
 
 @timeit
 def run_python_sort(arr: List) -> List:
+    """
+    TODO
+    """
+
     return sorted(arr)
 
 
+"""
+TODO
+"""
 PROD_N_SAMPLES = 10  # TODO more
 PROD_SIZE_CONFIGURATIONS = [
     [n for n in range(100, 1000, 100)],
@@ -126,6 +160,10 @@ ENTROPY_CONFIGURATIONS = {
 
 # arr_size vs. comparisons with and without minrun + insertion sorting
 def benchmark_minrun_impact() -> None:
+    """
+    TODO
+    """
+
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
@@ -145,6 +183,10 @@ def benchmark_minrun_impact() -> None:
 
 
 def benchmark_random() -> None:
+    """
+    TODO
+    """
+
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
@@ -181,6 +223,10 @@ def benchmark_random() -> None:
 
 
 def benchmark_runs() -> None:
+    """
+    TODO
+    """
+
     for config_name, factor in RUNS_CONFIGURATIONS.items():
         _benchmark_runs(config_name, factor)
 
@@ -225,6 +271,10 @@ def _benchmark_runs(config_name: str, factor: int) -> None:
 
 
 def benchmark_entropy() -> None:
+    """
+    TODO
+    """
+
     for config_name, entropy_interval in ENTROPY_CONFIGURATIONS.items():
         _benchmark_entropy(config_name, entropy_interval)
 
@@ -273,6 +323,10 @@ def _benchmark_entropy(config_name: str, entropy_interval: Tuple[float, float]) 
 
 
 def run_all_benchmarks() -> None:
+    """
+    TODO
+    """
+
     benchmark_minrun_impact()
     # benchmark_random()
     # benchmark_runs()

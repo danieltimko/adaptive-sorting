@@ -4,6 +4,10 @@ T = TypeVar('T')
 
 
 def powersort(arr: List[T], fix_minrun: bool = True) -> Tuple[List[T], int]:
+    """
+    TODO
+    """
+
     n = len(arr)
     X = []
     P = []

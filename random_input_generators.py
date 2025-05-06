@@ -6,11 +6,19 @@ import random
 
 # TODO move to utils?
 def _calc_entropy(run_profile: List[int]) -> float:
+    """
+    TODO
+    """
+
     arr = np.array(run_profile) / sum(run_profile)
     return -np.sum(arr * np.log2(arr))
 
 
 def _calc_entropy_bounds(arr_len: int, arr_sum: int) -> Tuple[float, float]:
+    """
+    TODO
+    """
+
     # max entropy is log(k) by definition, where k is number of runs
     max_entropy = np.log2(arr_len)  # FIXME take remainder into account
     # min entropy is when the profile is most skewed, like this [2,2,...,2,2,X] where X is the remainder
@@ -26,7 +34,10 @@ def _calc_entropy_bounds(arr_len: int, arr_sum: int) -> Tuple[float, float]:
 
 def generate_random_list(n: int, bounds: Tuple[int, int], number_of_runs: int | None = None,
                          entropy_range: Tuple[float, float] | None = None) -> List[int]:
-    # TODO docstring
+    """
+    TODO
+    """
+
     if number_of_runs or entropy_range:
         # Get run profile (random array [1..n_runs] summing to <size>)
         if number_of_runs:
@@ -65,6 +76,10 @@ def generate_random_list(n: int, bounds: Tuple[int, int], number_of_runs: int | 
 
 
 def _generate_random_run_profile(n: int, q: int) -> List[int]:
+    """
+    TODO
+    """
+
     runs = [2] * q  # minimal size of a run is 2
     for _ in range(n-q*2):
         i = random.randint(0, q-1)
@@ -74,6 +89,10 @@ def _generate_random_run_profile(n: int, q: int) -> List[int]:
 
 def _generate_random_run(n: int, bounds: Tuple[int, int],
                          first_bounds: Tuple[int, int]) -> Tuple[List[int], bool]:
+    """
+    TODO
+    """
+
     first = random.randint(first_bounds[0], first_bounds[1])
     while True:
         increasing = random.randint(0, 1)
@@ -92,6 +111,10 @@ def _generate_random_run(n: int, bounds: Tuple[int, int],
 
 
 def _generate_profiles_with_increasing_entropy(arr_size: int, n_runs: int) -> Generator:
+    """
+    TODO
+    """
+
     # The idea is to generate run profiles with increasing entropy
     # Start with almost sorted array, and gradually balance it
     prof = [2] * (n_runs-1) + [arr_size-2*(n_runs-1)]

@@ -17,6 +17,10 @@ class Run:
 
 
 def timsort(arr: List[T]) -> Tuple[List[T], int]:
+    """
+    TODO
+    """
+
     runs, comparisons = find_runs(arr)
     S = []
     for run in runs:

@@ -12,6 +12,10 @@ CSV_DELIMITER = ','
 
 
 def save_to_csv(results: TResults, file_name: str) -> None:
+    """
+    TODO
+    """
+
     with open(f'./output/raw_data/{file_name}.csv', mode='w', newline='') as file:
         writer = csv.writer(file, delimiter=CSV_DELIMITER)
         # First line is header
@@ -30,6 +34,10 @@ def save_to_csv(results: TResults, file_name: str) -> None:
 
 def plot_minrun_results(data: Dict[int, Tuple[int, float]], x_label: str, y_label: str,
                         title: str, file_name: str, xlog: bool = False) -> None:
+    """
+    TODO
+    """
+
     plt.figure(figsize=(10, 6))
     x = list(data.keys())
     data_powersort_without_insertion_sort = [v[0] for v in data.values()]
@@ -50,6 +58,10 @@ def plot_minrun_results(data: Dict[int, Tuple[int, float]], x_label: str, y_labe
 
 def plot_results(data: TResults, x_label: str, y_label: str, title: str,
                  file_name: str, fit_to_poly: bool = True, show: bool = False) -> None:
+    """
+    TODO
+    """
+
     plt.figure(figsize=(10, 6))
     x = list(data.keys())
     data_merge_sort = [v[0] for v in data.values()]

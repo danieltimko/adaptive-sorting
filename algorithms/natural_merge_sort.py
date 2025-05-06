@@ -1,10 +1,15 @@
 from typing import List, Tuple, TypeVar
 
 
+# TODO
 T = TypeVar('T')
 
 
 def natural_merge_sort(arr: List[T]) -> List[T]:
+    """
+    TODO
+    """
+
     if len(arr) <= 1:
         return arr
 
@@ -25,6 +30,10 @@ def natural_merge_sort(arr: List[T]) -> List[T]:
 
 
 def find_runs(arr: List[T]) -> List[Tuple[int, int]]:
+    """
+    TODO
+    """
+
     runs = []
     i = 0
     while i < len(arr):
@@ -43,6 +52,10 @@ def find_runs(arr: List[T]) -> List[Tuple[int, int]]:
 
 
 def merge(arr: List[T], l: int, m: int, r: int) -> None:
+    """
+    TODO
+    """
+
     left = arr[l:m]
     right = arr[m:r]
     k = l
