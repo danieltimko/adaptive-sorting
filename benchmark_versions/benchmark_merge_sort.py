@@ -1,4 +1,9 @@
-def merge_sort(arr):
+from typing import TypeVar, List, Tuple
+
+T = TypeVar('T')
+
+
+def merge_sort(arr: List[T]) -> Tuple[List[T], int]:
     if len(arr) <= 1:
         return arr, 0
     comparisons = 0
@@ -11,7 +16,7 @@ def merge_sort(arr):
     return merged, comparisons + comp
 
 
-def merge(left, right):
+def merge(left: List[T], right: List[T]) -> Tuple[List[T], int]:
     comparisons = 0
     arr = []
     li = 0

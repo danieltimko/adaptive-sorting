@@ -1,5 +1,5 @@
-import random
 import time
+from typing import Callable, Any, List, Tuple
 
 from benchmark_versions.benchmark_merge_sort import merge_sort
 from benchmark_versions.benchmark_natural_merge_sort import natural_merge_sort
@@ -10,7 +10,7 @@ from output_generation import plot_results, plot_minrun_results, save_to_csv
 from random_input_generators import generate_random_list
 
 
-def timeit(func):
+def timeit(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         start_time = time.process_time()
         result = func(*args, **kwargs)
@@ -23,35 +23,35 @@ class Comparable:
     # Static variable to track the number of comparisons
     comparison_count = 0
 
-    def __init__(self, value):
+    def __init__(self, value: Any) -> None:
         self.value = value
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         Comparable.comparison_count += 1
         return self.value < other.value
 
-    def __le__(self, other):
+    def __le__(self, other: Any) -> bool:
         Comparable.comparison_count += 1
         return self.value <= other.value
 
-    def __gt__(self, other):
+    def __gt__(self, other: Any) -> bool:
         Comparable.comparison_count += 1
         return self.value > other.value
 
-    def __ge__(self, other):
+    def __ge__(self, other: Any) -> bool:
         Comparable.comparison_count += 1
         return self.value >= other.value
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         Comparable.comparison_count += 1
         return self.value == other.value
 
-    def __ne__(self, other):
+    def __ne__(self, other: Any) -> bool:
         Comparable.comparison_count += 1
         return self.value != other.value
 
 
-def run_python_sort_for_comparisons(arr):
+def run_python_sort_for_comparisons(arr: List) -> int:
     Comparable.comparison_count = 0
     wrapped_arr = [Comparable(x) for x in arr]
     sorted(wrapped_arr)
@@ -59,27 +59,27 @@ def run_python_sort_for_comparisons(arr):
 
 
 @timeit
-def run_timsort(arr):
+def run_timsort(arr: List) -> Tuple[List, int]:
     return timsort(arr)
 
 
 @timeit
-def run_powersort(arr, fix_minrun=True):
+def run_powersort(arr: List, fix_minrun: bool = True) -> Tuple[List, int]:
     return powersort(arr, fix_minrun)
 
 
 @timeit
-def run_natural_merge_sort(arr):
+def run_natural_merge_sort(arr: List) -> Tuple[List, int]:
     return natural_merge_sort(arr)
 
 
 @timeit
-def run_merge_sort(arr):
+def run_merge_sort(arr: List) -> Tuple[List, int]:
     return merge_sort(arr)
 
 
 @timeit
-def run_python_sort(arr):
+def run_python_sort(arr: List) -> List:
     return sorted(arr)
 
 
@@ -92,7 +92,6 @@ PROD_SIZE_CONFIGURATIONS = [
 ]
 PROD_RUNS_CONFIGURATIONS = {
     # TODO explain these values
-    # TODO what if I say there will be: N/2 (random), 1000 (presorted), 10 (heavily_presorted) runs?
     "random": 2,
     "presorted": 50,
     "heavily_presorted": 500,
@@ -126,7 +125,7 @@ ENTROPY_CONFIGURATIONS = {
 
 
 # arr_size vs. comparisons with and without minrun + insertion sorting
-def benchmark_minrun_impact():
+def benchmark_minrun_impact() -> None:
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
@@ -143,10 +142,9 @@ def benchmark_minrun_impact():
     plot_minrun_results(results, "Array size", "# of key comparisons [% diff]",
                         "Performance impact of MIN_RUN and using insertion sort for small runs",
                         "minrun_impact_comparisons", xlog=True)
-    return results
 
 
-def benchmark_random():
+def benchmark_random() -> None:
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
@@ -180,15 +178,14 @@ def benchmark_random():
     plot_results(results, "Array size (N)", "# of key comparisons [% diff from Merge Sort]",
                  f"Array size vs. # of key comparisons",
                  file_name, fit_to_poly=True, show=False)
-    return results
 
 
-def benchmark_runs():
+def benchmark_runs() -> None:
     for config_name, factor in RUNS_CONFIGURATIONS.items():
         _benchmark_runs(config_name, factor)
 
 
-def _benchmark_runs(config_name, factor):
+def _benchmark_runs(config_name: str, factor: int) -> None:
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
@@ -225,15 +222,14 @@ def _benchmark_runs(config_name, factor):
     plot_results(results, "Array size (N)", "# of key comparisons [% diff from Merge Sort]",
                  f"Array size vs. # of key comparisons (number of runs is N/{factor} => array is {config_name})",
                  file_name, fit_to_poly=True, show=False)
-    return results
 
 
-def benchmark_entropy():
+def benchmark_entropy() -> None:
     for config_name, entropy_interval in ENTROPY_CONFIGURATIONS.items():
         _benchmark_entropy(config_name, entropy_interval)
 
 
-def _benchmark_entropy(config_name, entropy_interval):
+def _benchmark_entropy(config_name: str, entropy_interval: Tuple[float, float]) -> None:
     """
     TODO the problem is that the algorithms work with a different run profile (because of MIN_RUN=32)
     So results from this might actually be kinda useless, unless the runs are really big?
@@ -274,10 +270,9 @@ def _benchmark_entropy(config_name, entropy_interval):
                  f"Array size vs. # of key comparisons (entropy interval is "
                  f"{entropy_interval[0]*100}%-{entropy_interval[1]*100}% => run profile is {config_name})",
                  file_name, fit_to_poly=True, show=False)
-    return results
 
 
-def run_all_benchmarks():
+def run_all_benchmarks() -> None:
     benchmark_minrun_impact()
     # benchmark_random()
     # benchmark_runs()

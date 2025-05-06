@@ -1,4 +1,10 @@
-def natural_merge_sort(arr):
+from typing import List, Tuple, TypeVar
+
+
+T = TypeVar('T')
+
+
+def natural_merge_sort(arr: List[T]) -> List[T]:
     if len(arr) <= 1:
         return arr
 
@@ -18,7 +24,7 @@ def natural_merge_sort(arr):
     return arr
 
 
-def find_runs(arr):
+def find_runs(arr: List[T]) -> List[Tuple[int, int]]:
     runs = []
     i = 0
     while i < len(arr):
@@ -36,7 +42,7 @@ def find_runs(arr):
     return runs
 
 
-def merge(arr, l, m, r):
+def merge(arr: List[T], l: int, m: int, r: int) -> None:
     left = arr[l:m]
     right = arr[m:r]
     k = l

@@ -1,16 +1,21 @@
+from typing import TypeVar, List
+
+T = TypeVar('T')
+
+
 class Run:
-    def __init__(self, low, high):
+    def __init__(self, low: int, high: int) -> None:
         self.low = low
         self.high = high
 
-    def __len__(self):
-        return self.high - self.low+1
+    def __len__(self) -> int:
+        return self.high - self.low + 1
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"({self.low}, {self.high})"
 
 
-def timsort(arr):
+def timsort(arr: List[T]) -> List[T]:
     runs = find_runs(arr)
     S = []
     for run in runs:
@@ -53,7 +58,7 @@ def timsort(arr):
     return arr
 
 
-def find_runs(arr):
+def find_runs(arr: List[T]) -> List[Run]:
     MIN_RUN = 32
     runs = []
     i = 0
@@ -70,7 +75,7 @@ def find_runs(arr):
     return runs
 
 
-def find_next_natural_run(arr, start):
+def find_next_natural_run(arr: List[T], start: int) -> int:
     end = start
     while end < len(arr)-1 and arr[end] == arr[end+1]:
         end += 1
@@ -86,7 +91,7 @@ def find_next_natural_run(arr, start):
     return end
 
 
-def binary_insertion_sort(arr, left, right, m):
+def binary_insertion_sort(arr: List[T], left: int, right: int, m: int) -> None:
     for i in range(m+1, right+1):
         val = arr[i]
         j = binary_search(arr, val, left, i)
@@ -94,7 +99,7 @@ def binary_insertion_sort(arr, left, right, m):
         arr[j] = val
 
 
-def binary_search(arr, val, start, end):
+def binary_search(arr: List[T], val: T, start: int, end: int) -> int:
     while start < end:
         mid = (start+end) // 2
         if arr[mid] < val:
@@ -104,7 +109,7 @@ def binary_search(arr, val, start, end):
     return start
 
 
-def merge(arr, left, mid, right):
+def merge(arr: List[T], left: int, mid: int, right: int) -> None:
     left_part = arr[left:mid+1]
     right_part = arr[mid+1:right+1]
     l, r = 0, 0

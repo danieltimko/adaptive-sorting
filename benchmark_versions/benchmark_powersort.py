@@ -1,4 +1,9 @@
-def powersort(arr, fix_minrun=True):
+from typing import TypeVar, List, Tuple
+
+T = TypeVar('T')
+
+
+def powersort(arr: List[T], fix_minrun: bool = True) -> Tuple[List[T], int]:
     n = len(arr)
     X = []
     P = []
@@ -23,7 +28,7 @@ def powersort(arr, fix_minrun=True):
     return arr, comparisons
 
 
-def find_next_run(arr, start, fix_minrun=True):
+def find_next_run(arr: List[T], start: int, fix_minrun: bool = True) -> Tuple[int, int]:
     comparisons = 0
     end, comp = _find_next_run(arr, start)
     comparisons += comp
@@ -38,7 +43,7 @@ def find_next_run(arr, start, fix_minrun=True):
     return end, comparisons
 
 
-def binary_insertion_sort(arr, left, right, m):
+def binary_insertion_sort(arr: List[T], left: int, right: int, m: int) -> int:
     comparisons = 0
     for i in range(m+1, right+1):
         val = arr[i]
@@ -49,7 +54,7 @@ def binary_insertion_sort(arr, left, right, m):
     return comparisons
 
 
-def binary_search(arr, val, start, end):
+def binary_search(arr: List[T], val: T, start: int, end: int) -> Tuple[int, int]:
     comparisons = 0
     while start < end:
         mid = (start+end) // 2
@@ -61,7 +66,7 @@ def binary_search(arr, val, start, end):
     return start, comparisons
 
 
-def _find_next_run(arr, start):
+def _find_next_run(arr: List[T], start: int) -> Tuple[int, int]:
     comparisons = 0
     end = start
     while end < len(arr)-1:
@@ -87,7 +92,7 @@ def _find_next_run(arr, start):
     return end, comparisons
 
 
-def node_power(s1, e1, s2, e2, n):
+def node_power(s1: int, e1: int, s2: int, e2: int, n: int) -> int:
     n1 = e1 - s1 + 1
     n2 = e2 - s2 + 1
     l = 0
@@ -98,7 +103,7 @@ def node_power(s1, e1, s2, e2, n):
     return l
 
 
-def merge(arr, left, mid, right):
+def merge(arr: List[T], left: int, mid: int, right: int) -> Tuple[int, int, int]:
     comparisons = 0
     left_part = arr[left:mid+1]
     right_part = arr[mid+1:right+1]

@@ -1,16 +1,22 @@
+from typing import TypeVar, List, Tuple
+
+T = TypeVar('T')
+
+
 class Run:
-    def __init__(self, low, high):
+    # TODO add this also to benchmark_powersort
+    def __init__(self, low: int, high: int) -> None:
         self.low = low
         self.high = high
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.high - self.low + 1
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"({self.low}, {self.high})"
 
 
-def timsort(arr):
+def timsort(arr: List[T]) -> Tuple[List[T], int]:
     runs, comparisons = find_runs(arr)
     S = []
     for run in runs:
@@ -22,14 +28,14 @@ def timsort(arr):
             r3 = S[-3] if h >= 3 else None
             r4 = S[-4] if h >= 4 else None
 
-            def merge12():
+            def merge12() -> int:
                 # Merge r1 and r2
                 S.pop(), S.pop()
                 comp = merge(arr, r2.low, r2.high, r1.high)
                 S.append(Run(r2.low, r1.high))
                 return comp
 
-            def merge23():
+            def merge23() -> int:
                 # Merge r2 and r3
                 S.pop(), S.pop(), S.pop()
                 comp = merge(arr, r3.low, r3.high, r2.high)
@@ -54,9 +60,9 @@ def timsort(arr):
     return arr, comparisons
 
 
-def find_runs(arr):
+def find_runs(arr: List[T]) -> Tuple[List[Run], int]:
     comparisons = 0
-    MIN_RUN = 32
+    MIN_RUN = 32  # TODO parametrize
     runs = []
     i = 0
     while i < len(arr):
@@ -74,7 +80,7 @@ def find_runs(arr):
     return runs, comparisons
 
 
-def find_next_natural_run(arr, start):
+def find_next_natural_run(arr: List[T], start: int) -> Tuple[int, int]:
     comparisons = 0
     end = start
     while end < len(arr)-1:
@@ -100,7 +106,7 @@ def find_next_natural_run(arr, start):
     return end, comparisons
 
 
-def binary_insertion_sort(arr, left, right, m):
+def binary_insertion_sort(arr: List[T], left: int, right: int, m: int) -> int:
     comparisons = 0
     for i in range(m+1, right+1):
         val = arr[i]
@@ -111,7 +117,7 @@ def binary_insertion_sort(arr, left, right, m):
     return comparisons
 
 
-def binary_search(arr, val, start, end):
+def binary_search(arr: List[T], val: T, start: int, end: int) -> Tuple[int, int]:
     comparisons = 0
     while start < end:
         mid = (start+end) // 2
@@ -123,7 +129,7 @@ def binary_search(arr, val, start, end):
     return start, comparisons
 
 
-def merge(arr, left, mid, right):
+def merge(arr: List[T], left: int, mid: int, right: int) -> int:
     comparisons = 0
     left_part = arr[left:mid+1]
     right_part = arr[mid+1:right+1]
