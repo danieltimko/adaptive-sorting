@@ -1,52 +1,74 @@
 from typing import List, TypeVar, Tuple
 
 
-# TODO
+# Generic type of elements in the input list
 T = TypeVar('T')
 
 
-# TODO add class Run?
+class Run:
+    """
+    TODO
+    """
+
+    def __init__(self, low: int, high: int) -> None:
+        self.start = low
+        self.end = high
+
+    def __len__(self) -> int:
+        return self.end - self.start + 1
+
+    def __str__(self) -> str:
+        return f"({self.start}, {self.end})"
 
 
 def powersort(arr: List[T], fix_minrun: bool = True) -> List[T]:
     """
-    TODO
+    Sorts the input list using Powersort algorithm.
+
+    This implementation can leverage the same optimization techniques as Timsort (timsort.py):
+    MIN_RUN=32, binary insertion sort, galloping mode (TODO)
+
+    :param arr: Input sequence to sort
+    :param fix_minrun: Whether to enforce minimal run length (and use binary insertion sort for smaller runs)
+    :return: Sorted sequence (increasing)
     """
 
     n = len(arr)
     X = []
     P = []
-    s1 = 0
-    e1 = find_next_run(arr, 0, fix_minrun)
-    while e1 < n - 1:
-        s2 = e1 + 1
-        e2 = find_next_run(arr, s2, fix_minrun)
-        p = node_power(s1, e1, s2, e2, n)
+    r1 = _find_next_run(arr, 0, fix_minrun)  # current run
+    while r1.end < n - 1:
+        r2 = _find_next_run(arr, r1.start + 1, fix_minrun)  # next run
+        p = node_power(r1, r2, n)
         while P and P[-1] > p:
             P.pop()
-            s1, e1 = merge(arr, *X.pop(), e1)
-        X.append((s1, e1))
+            r0 = X.pop()  # previous run on the stack
+            s1, e1 = _merge(arr, r0.start, r0.end, r1.end)
+        X.append(r1)
         P.append(p)
-        s1 = s2
-        e1 = e2
+        r1 = r2
     while X:
-        s1, e1 = merge(arr, *X.pop(), e1)
+        r0 = X.pop()
+        r1 = _merge(arr, r0.start, r0.end, r1.end)
     return arr
 
 
-def find_next_run(arr: List[T], start: int, fix_minrun: bool = True) -> int:
+def _find_next_run(arr: List[T], start: int, fix_minrun: bool = True) -> Run:
     """
     TODO
+
+    :param fix_minrun: Whether to enforce minimal run length (and use binary insertion sort for smaller runs)
+
     """
 
-    end = _find_next_run(arr, start)
+    end = _find_next_natural_run(arr, start)
     if fix_minrun:
         MIN_RUN = 32
         run_size = end - start + 1
         if run_size < MIN_RUN:
             end = min(start + MIN_RUN - 1, len(arr) - 1)
             binary_insertion_sort(arr, start, end, start)
-    return end
+    return Run(start, end)
 
 
 def binary_insertion_sort(arr: List[T], left: int, right: int, m: int) -> None:
@@ -75,7 +97,7 @@ def binary_search(arr: List[T], val: T, start: int, end: int) -> int:
     return start
 
 
-def _find_next_run(arr: List[T], start: int) -> int:
+def _find_next_natural_run(arr: List[T], start: int) -> int:
     """
     TODO
     """
@@ -95,22 +117,22 @@ def _find_next_run(arr: List[T], start: int) -> int:
     return end
 
 
-def node_power(s1: int, e1: int, s2: int, e2: int, n: int) -> int:
+def node_power(r1: Run, r2: Run, n: int) -> int:
     """
     TODO
     """
 
-    n1 = e1 - s1 + 1
-    n2 = e2 - s2 + 1
+    n1 = r1.end - r1.start + 1
+    n2 = r2.end - r2.start + 1
     l = 0
-    a = (s1 + n1/2 - 1)/n
-    b = (s2 + n2/2 - 1)/n
+    a = (r1.start + n1 / 2 - 1) / n
+    b = (r2.start + n2 / 2 - 1) / n
     while int(a * 2**l) == int(b * 2**l):
         l += 1
     return l
 
 
-def merge(arr: List[T], left: int, mid: int, right: int) -> Tuple[int, int]:
+def _merge(arr: List[T], left: int, mid: int, right: int) -> Tuple[int, int]:
     """
     TODO
     """
