@@ -1,6 +1,7 @@
 from typing import TypeVar, List
 
-# TODO
+
+# Generic type of elements in the input list
 T = TypeVar('T')
 
 
@@ -22,7 +23,15 @@ class Run:
 
 def timsort(arr: List[T]) -> List[T]:
     """
-    TODO
+    Sorts the input list using Timsort algorithm.
+
+    Note that this implementation of Timsort does not include *all* performance
+    optimizations proposed by Tim Peters.
+    See https://svn.python.org/projects/python/trunk/Objects/listsort.txt
+    The implemented optimizations: MIN_RUN=32, binary insertion sort, galloping mode (TODO)
+
+    :param arr: Input sequence to sort
+    :return: Sorted sequence (increasing)
     """
 
     runs = find_runs(arr)

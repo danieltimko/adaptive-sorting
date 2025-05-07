@@ -1,26 +1,29 @@
 from typing import List, Tuple, TypeVar
 
 
-# TODO
+# Generic type of elements in the input list
 T = TypeVar('T')
 
 
 def natural_merge_sort(arr: List[T]) -> List[T]:
     """
-    TODO
+    Sorts the input list using Natural Merge Sort algorithm.
+
+    :param arr: Input sequence to sort
+    :return: Sorted sequence (increasing)
     """
 
     if len(arr) <= 1:
         return arr
 
-    runs = find_runs(arr)
+    runs = _find_runs(arr)
     while len(runs) > 1:
         new_runs = []
         i = 0
         while i < len(runs)-1:
             l, m = runs[i]
             _, r = runs[i+1]
-            merge(arr, l, m, r)
+            _merge(arr, l, m, r)
             new_runs.append((l, r))
             i += 2
         if i == len(runs)-1:
@@ -29,9 +32,15 @@ def natural_merge_sort(arr: List[T]) -> List[T]:
     return arr
 
 
-def find_runs(arr: List[T]) -> List[Tuple[int, int]]:
+def _find_runs(arr: List[T]) -> List[Tuple[int, int]]:
     """
-    TODO
+    Finds the run decomposition of the input sequence.
+    Supports detecting both ascending and descending runs. More precisely,
+    it reverses the descending runs in-place, in order to work exclusively
+    with ascending runs for simplicity.
+
+    :param arr: Input sequence
+    :return: List of runs represented as pairs of indices [start, end)
     """
 
     runs = []
@@ -51,16 +60,21 @@ def find_runs(arr: List[T]) -> List[Tuple[int, int]]:
     return runs
 
 
-def merge(arr: List[T], l: int, m: int, r: int) -> None:
+def _merge(arr: List[T], l: int, m: int, r: int) -> None:
     """
-    TODO
+    Merges two adjacent runs of the input sequence in-place.
+
+    :param arr: Input sequence
+    :param l: (left) Starting index of the first run
+    :param m: (middle) Ending index of the first run, starting index of the second run
+    :param r: (right) Ending index of the second run
     """
 
-    left = arr[l:m]
-    right = arr[m:r]
-    k = l
-    i = 0
-    j = 0
+    left = arr[l:m]   # first run
+    right = arr[m:r]  # second run
+    k = l  # index in the original array
+    i = 0  # index in the first run
+    j = 0  # index in the second run
     while i < len(left) and j < len(right):
         if left[i] <= right[j]:
             arr[k] = left[i]
