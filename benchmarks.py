@@ -1,10 +1,10 @@
 import time
 from typing import Callable, Any, List, Tuple
 
-from benchmark_versions.benchmark_merge_sort import merge_sort
-from benchmark_versions.benchmark_natural_merge_sort import natural_merge_sort
-from benchmark_versions.benchmark_timsort import timsort
-from benchmark_versions.benchmark_powersort import powersort
+from benchmark_versions.merge_sort import merge_sort
+from benchmark_versions.natural_merge_sort import natural_merge_sort
+from benchmark_versions.timsort import timsort
+from benchmark_versions.powersort import powersort
 
 from output_generation import plot_results, plot_minrun_results, save_to_csv
 from random_input_generators import generate_random_list
@@ -79,12 +79,12 @@ def run_timsort(arr: List) -> Tuple[List, int]:
 
 
 @timeit
-def run_powersort(arr: List, fix_minrun: bool = True) -> Tuple[List, int]:
+def run_powersort(arr: List, min_run_length: int | None = 32) -> Tuple[List, int]:
     """
     TODO
     """
 
-    return powersort(arr, fix_minrun)
+    return powersort(arr, min_run_length)
 
 
 @timeit
@@ -172,8 +172,8 @@ def benchmark_minrun_impact() -> None:
             sum_with = 0
             for _ in range(N_SAMPLES):
                 arr = generate_random_list(arr_size, bounds)
-                (_, n_with), _ = run_powersort(arr.copy(), fix_minrun=True)
-                (_, n_without), _ = run_powersort(arr.copy(), fix_minrun=False)
+                (_, n_with), _ = run_powersort(arr.copy(), min_run_length=32)
+                (_, n_without), _ = run_powersort(arr.copy(), min_run_length=None)
                 sum_with += (n_with-n_without)/n_without
             results[arr_size] = (0, sum_with/N_SAMPLES)
 

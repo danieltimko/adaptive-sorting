@@ -1,27 +1,38 @@
 from typing import TypeVar, List, Tuple
 
 
+# Generic type of elements in the input list
 T = TypeVar('T')
 
 
 def merge_sort(arr: List[T]) -> Tuple[List[T], int]:
     """
-    TODO
+    Sorts the input list using traditional top-down Merge Sort algorithm.
+
+    :param arr: Input sequence to sort
+    :return: Sorted sequence (increasing), along with the count of performed element comparisons
     """
 
     if len(arr) <= 1:
         return arr, 0
     comparisons = 0
     m = len(arr) // 2
-    left, comp = merge_sort(arr[:m])
-    comparisons += comp
-    right, comp = merge_sort(arr[m:])
-    comparisons += comp
-    merged, comp = merge(left, right)
-    return merged, comparisons + comp
+    left, diff = merge_sort(arr[:m])
+    comparisons += diff
+    right, diff = merge_sort(arr[m:])
+    comparisons += diff
+    merged, diff = merge(left, right)
+    return merged, comparisons + diff
 
 
 def merge(left: List[T], right: List[T]) -> Tuple[List[T], int]:
+    """
+    Merges two sorted arrays into a single one in linear time.
+
+    :param left: First sorted array
+    :param right: Second sorted array
+    :return: Merged sorted array, along with the count of performed element comparisons
+    """
     comparisons = 0
     arr = []
     li = 0
