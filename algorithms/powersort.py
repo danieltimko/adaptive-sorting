@@ -1,100 +1,58 @@
-def powersort(arr, fix_minrun=True):
+from typing import List, TypeVar
+
+from algorithms.commons import merge, find_next_run, Run
+
+# Generic type of elements in the input list
+T = TypeVar('T')
+
+
+def powersort(arr: List[T], min_run_length: int | None = None) -> List[T]:
+    """
+    Sorts the input list using Powersort algorithm.
+
+    This implementation can leverage the same optimization techniques as Timsort (timsort.py):
+    MIN_RUN, binary insertion sort, galloping mode (TODO)
+
+    :param arr: Input sequence to sort
+    :param min_run_length: (optional) Minimal length of runs to enforce (and use binary insertion sort for shorter runs)
+    :return: Sorted sequence (increasing)
+    """
+
     n = len(arr)
     X = []
     P = []
-    s1 = 0
-    e1 = find_next_run(arr, 0, fix_minrun)
-    while e1 < n - 1:
-        s2 = e1 + 1
-        e2 = find_next_run(arr, s2, fix_minrun)
-        p = node_power(s1, e1, s2, e2, n)
+    r1 = find_next_run(arr, 0, min_run_length)  # current run
+    while r1.end < n - 1:
+        r2 = find_next_run(arr, r1.end + 1, min_run_length)  # next run
+        p = node_power(r1, r2, n)
         while P and P[-1] > p:
             P.pop()
-            s1, e1 = merge(arr, *X.pop(), e1)
-        X.append((s1, e1))
+            r0 = X.pop()  # previous run on the stack
+            r1 = merge(arr, r0.start, r0.end, r1.end)
+        X.append(r1)
         P.append(p)
-        s1 = s2
-        e1 = e2
+        r1 = r2
     while X:
-        (s1, e1) = merge(arr, *X.pop(), e1)
+        r0 = X.pop()
+        r1 = merge(arr, r0.start, r0.end, r1.end)
     return arr
 
 
-def find_next_run(arr, start, fix_minrun=True):
-    end = _find_next_run(arr, start)
-    if fix_minrun:
-        MIN_RUN = 32
-        run_size = end - start + 1
-        if run_size < MIN_RUN:
-            end = min(start + MIN_RUN - 1, len(arr) - 1)
-            binary_insertion_sort(arr, start, end, start)
-    return end
+def node_power(r1: Run, r2: Run, n: int) -> int:
+    """
+    Calculates the power of the run boundary of the two runs.
 
+    :param r1: First run
+    :param r2: Second run
+    :param n: Length of the input array
+    :return: Internal node power of the two runs
+    """
 
-def binary_insertion_sort(arr, left, right, m):
-    for i in range(m+1, right+1):
-        val = arr[i]
-        j = binary_search(arr, val, left, i)
-        arr[j+1:i+1] = arr[j:i]
-        arr[j] = val
-
-
-def binary_search(arr, val, start, end):
-    while start < end:
-        mid = (start+end) // 2
-        if arr[mid] < val:
-            start = mid+1
-        else:
-            end = mid
-    return start
-
-
-def _find_next_run(arr, start):
-    end = start
-    while end < len(arr)-1 and arr[end] == arr[end+1]:
-        end += 1
-    tmp = end
-    while end < len(arr)-1 and arr[end] <= arr[end+1]:
-        # Ascending run
-        end += 1
-    if end == tmp:
-        # Descending run
-        while end < len(arr)-1 and arr[end] >= arr[end+1]:
-            end += 1
-        arr[start:end+1] = reversed(arr[start:end+1])
-    return end
-
-
-def node_power(s1, e1, s2, e2, n):
-    n1 = e1 - s1 + 1
-    n2 = e2 - s2 + 1
+    n1 = r1.end - r1.start + 1
+    n2 = r2.end - r2.start + 1
     l = 0
-    a = (s1 + n1/2 - 1)/n
-    b = (s2 + n2/2 - 1)/n
+    a = (r1.start + n1 / 2 - 1) / n
+    b = (r2.start + n2 / 2 - 1) / n
     while int(a * 2**l) == int(b * 2**l):
         l += 1
     return l
-
-
-def merge(arr, left, mid, right):
-    left_part = arr[left:mid+1]
-    right_part = arr[mid+1:right+1]
-    l, r = 0, 0
-    i = left
-    while l < len(left_part) and r < len(right_part):
-        if left_part[l] <= right_part[r]:
-            arr[i] = left_part[l]
-            l += 1
-        else:
-            arr[i] = right_part[r]
-            r += 1
-        i += 1
-    while l < len(left_part):
-        arr[i] = left_part[l]
-        l += 1
-        i += 1
-    while r < len(right_part):
-        arr[i] = right_part[r]
-        r += 1
-        i += 1
-    return left, right
