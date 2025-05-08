@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+"""
+Type alias for the benchmark results
+{array size: (results_ms, results_nms, results_timsort, results_powersort, results_python_sort)}
+Results values are relative difference [%] from the baseline (mergesort). Therefore, results_ms is always 0.0.
+"""
 TResults = Dict[int, Tuple[float, float, float, float, float]]
 
 CSV_DELIMITER = ','
@@ -13,7 +18,11 @@ CSV_DELIMITER = ','
 
 def save_to_csv(results: TResults, file_name: str) -> None:
     """
-    TODO
+    Saves the benchmark results as a CSV file in the output directory.
+
+    :param results: Benchmark results
+    :param file_name: Name of the output CSV file
+    :return: None; Side effect: CSV file with the results
     """
 
     with open(f'./output/raw_data/{file_name}.csv', mode='w', newline='') as file:
@@ -33,9 +42,21 @@ def save_to_csv(results: TResults, file_name: str) -> None:
 
 
 def plot_minrun_results(data: Dict[int, Tuple[int, float]], x_label: str, y_label: str,
-                        title: str, file_name: str, xlog: bool = False) -> None:
+                        title: str, file_name: str, xlog: bool = False, show: bool = False) -> None:
     """
-    TODO
+    Generates a plot visualization for the MIN_RUN benchmark and saves it as a PNG file in the output directory.
+
+    :param data: Benchmark results - {array size: (results_without_minrun, results_with_minrun)}
+        Results values are relative difference [%] from the baseline (results_without_minrun).
+        Therefore, results_without_minrun is always 0.0.
+    :param x_label: Label for the X axis (array size)
+    :param y_label: Label for the Y axis (% diff)
+    :param title: Title of the plot
+    :param file_name: Name of the output PNG file
+    :param xlog: Whether to use logarithmic scale for the X axis. Useful when the experiment is performed in such a way
+        that the datapoints for lower x values are much denser, and the datapoints for higher x values are more sparse.
+    :param show: Whether to show (open) the generated plot; Useful for debugging purposes.
+    :return: None; Side effect: PNG file with the generated plot
     """
 
     plt.figure(figsize=(10, 6))
@@ -54,12 +75,26 @@ def plot_minrun_results(data: Dict[int, Tuple[int, float]], x_label: str, y_labe
     plt.title(title)
     plt.legend()
     plt.savefig(f'./output/graphs/{file_name}.png')
+    if show:
+        plt.show()
 
 
 def plot_results(data: TResults, x_label: str, y_label: str, title: str,
                  file_name: str, fit_to_poly: bool = True, show: bool = False) -> None:
     """
-    TODO
+    Generates a plot visualization for the benchmark and saves it as a PNG file in the output directory.
+    Uses logarithmic scale for the X axis.
+
+    :param data: Benchmark results; See the definition of TResults
+    :param x_label: Label for the X axis (array size)
+    :param y_label: Label for the Y axis (% diff)
+    :param title: Title of the plot
+    :param file_name: Name of the output PNG file
+    :param fit_to_poly: Whether the result graphs should be fitted to a polynomial (using the least squares fitting).
+        If True, the generated plot contains the both layers: the raw results (opaque colors),
+        and the smoothed out results (more transparent colors).
+    :param show: Whether to show (open) the generated plot; Useful for debugging purposes.
+    :return: None; Side effect: PNG file with the generated plot
     """
 
     plt.figure(figsize=(10, 6))

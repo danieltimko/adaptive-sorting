@@ -14,13 +14,6 @@ T = TypeVar('T')
 
 
 def natural_merge_sort(arr: List[T]) -> Tuple[List[T], int]:
-    """
-    Sorts the input list using Natural Merge Sort algorithm.
-
-    :param arr: Input sequence to sort
-    :return: Sorted sequence (increasing)
-    """
-
     if len(arr) <= 1:
         return arr, 0
 
