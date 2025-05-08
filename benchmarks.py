@@ -5,6 +5,7 @@ from benchmark_versions.merge_sort import merge_sort
 from benchmark_versions.natural_merge_sort import natural_merge_sort
 from benchmark_versions.timsort import timsort
 from benchmark_versions.powersort import powersort
+from config import SIZE_CONFIGURATIONS, N_SAMPLES, RUNS_CONFIGURATIONS, ENTROPY_CONFIGURATIONS, MIN_RUN
 
 from output_generation import plot_results, plot_minrun_results, save_to_csv
 from random_input_generators import generate_random_list
@@ -102,11 +103,12 @@ def run_timsort(arr: List[T]) -> Tuple[TResult, float]:
 
 
 @timeit
-def run_powersort(arr: List, min_run_length: int | None = 32) -> Tuple[List, int]:
+def run_powersort(arr: List, min_run_length: int | None = MIN_RUN) -> Tuple[List, int]:
     """
     Runs the benchmark version of Powersort and measures its CPU execution time.
 
     :param arr: Input sequence to sort
+    :param min_run_length: (optional) Minimal length of runs to enforce; Default: 32
     :return: Sorted input along with the number of performed comparisons, along with the execution time [ms]
     """
 
@@ -137,48 +139,6 @@ def run_merge_sort(arr: List) -> Tuple[List, int]:
     return merge_sort(arr)
 
 
-"""
-Configurations for the input data to run the benchmarks on.
-Configurable properties: input size, number of datapoints for each size, number of runs, entropy of the run profile
-"""
-
-# The number of inputs/datapoints for each input size
-N_SAMPLES = 10  # TODO more
-
-"""
-Configures what input sizes should be considered for the benchmark inputs.
-This values represent the X axis in the plots.
-"""
-SIZE_CONFIGURATIONS = [
-    [n for n in range(100, 1000, 100)],  # TODO consider removing for the final version (too noisy results)
-    [n for n in range(1000, 10_000, 1000)],
-    # [n for n in range(10_000, 100_000, 10_000)],
-    # [n for n in range(100_000, 1_000_001, 100_000)]
-]
-
-"""
-Configures what number of runs (K) should the generated benchmark inputs have.
-The values in this dictionary represent the average run length.
-A separate plot is generated for each of the categories.
-"""
-RUNS_CONFIGURATIONS = {
-    "random": 2,               # N/2 runs
-    "presorted": 50,           # N/50 runs
-    "heavily_presorted": 500,  # N/500 runs
-}
-
-"""
-Configures what normalized entropy (h(P)) should the run profiles of the generated inputs have.
-The values in this dictionary represent the acceptable range for the normalized entropy.
-A separate plot is generated for each of the categories.
-"""
-ENTROPY_CONFIGURATIONS = {
-    "very_skewed": (.1, .2),        # 10-20% of log(K)
-    "partially_uniform": (.4, .6),  # 40-60% of log(K)
-    "heavily_uniform": (.9, 1.),    # 90-100% of log(K)
-}
-
-
 def benchmark_minrun_impact() -> None:
     """
     Runs the benchmark for MIN_RUN impact in Powersort.
@@ -191,14 +151,14 @@ def benchmark_minrun_impact() -> None:
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
-            print(arr_size)
+            print(f"Running MIN_RUN benchmark for N={arr_size}")
             # Set the value range to (0, N*100)
             # Not really important as long as the "high" value is reasonably large (=> not too many equal values).
             bounds = (0, arr_size*100)
             sum_with = 0
             for _ in range(N_SAMPLES):
                 arr = generate_random_list(arr_size, bounds)
-                (_, n_with), _ = run_powersort(arr.copy(), min_run_length=32)
+                (_, n_with), _ = run_powersort(arr.copy(), min_run_length=MIN_RUN)
                 (_, n_without), _ = run_powersort(arr.copy(), min_run_length=None)
                 sum_with += (n_with-n_without)/n_without
             results[arr_size] = (0, sum_with/N_SAMPLES)
@@ -219,7 +179,7 @@ def benchmark_random() -> None:
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
-            print(arr_size)
+            print(f"Running RANDOM benchmark for N={arr_size}")
             # Set the value range to (0, N*100)
             # Not really important as long as the "high" value is reasonably large (=> not too many equal values).
             bounds = (0, arr_size*100)
@@ -270,7 +230,7 @@ def _benchmark_runs(config_name: str, factor: int) -> None:
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
-            print(arr_size)
+            print(f"Running RUNS benchmark ({config_name}) for N={arr_size}")
             # Set the value range to (0, N*100)
             # Not really important as long as the "high" value is reasonably large (=> not too many equal values).
             bounds = (0, arr_size * 100)
@@ -325,7 +285,7 @@ def _benchmark_entropy(config_name: str, entropy_interval: Tuple[float, float]) 
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
-            print(arr_size)
+            print(f"Running RUNS benchmark ({config_name}) for N={arr_size}")
             # Set the value range to (0, N*100)
             # Not really important as long as the "high" value is reasonably large (=> not too many equal values).
             bounds = (0, arr_size * 100)
@@ -362,7 +322,8 @@ def _benchmark_entropy(config_name: str, entropy_interval: Tuple[float, float]) 
 
 def run_all_benchmarks() -> None:
     """
-    Executes all the benchmarks with all the defined input configurations.
+    Executes all the benchmarks with all the input configurations defined in `config.py`.
+    Note: This might take a very long time (hours), depending on the configured settings.
     """
     benchmark_minrun_impact()
     # benchmark_random()

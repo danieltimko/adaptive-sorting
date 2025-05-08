@@ -1,6 +1,7 @@
 from typing import TypeVar, List
 
 from algorithms.commons import merge, find_runs
+from config import MIN_RUN
 
 # Generic type of elements in the input list
 T = TypeVar('T')
@@ -13,13 +14,12 @@ def timsort(arr: List[T]) -> List[T]:
     Note that this implementation of Timsort does not include *all* performance
     optimizations proposed by Tim Peters.
     See https://svn.python.org/projects/python/trunk/Objects/listsort.txt
-    The implemented optimizations: MIN_RUN=32, binary insertion sort, galloping mode (TODO)
+    The implemented optimizations: MIN_RUN, binary insertion sort, galloping mode (TODO)
 
     :param arr: Input sequence to sort
     :return: Sorted sequence (increasing)
     """
 
-    MIN_RUN = 32
     runs = find_runs(arr, min_run_length=MIN_RUN)
     S = []
     for run in runs:

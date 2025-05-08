@@ -8,13 +8,13 @@ check the original algorithms in the algorithms directory.
 from typing import TypeVar, List, Tuple
 
 from benchmark_versions.commons import merge, find_runs
+from config import MIN_RUN
 
 # Generic type of elements in the input list
 T = TypeVar('T')
 
 
 def timsort(arr: List[T]) -> Tuple[List[T], int]:
-    MIN_RUN = 32
     runs, comparisons = find_runs(arr, min_run_length=MIN_RUN)
     S = []
     for run in runs:

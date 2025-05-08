@@ -5,6 +5,7 @@ from matplotlib.ticker import PercentFormatter
 import matplotlib.pyplot as plt
 import numpy as np
 
+from config import MIN_RUN
 
 """
 Type alias for the benchmark results
@@ -65,7 +66,7 @@ def plot_minrun_results(data: Dict[int, Tuple[int, float]], x_label: str, y_labe
     data_powersort_with_insertion_sort = [v[1] for v in data.values()]
 
     plt.plot(x, data_powersort_without_insertion_sort, label='Powersort without MIN_RUN', color='orange', linewidth=3)
-    plt.plot(x, data_powersort_with_insertion_sort, label='Powersort with MIN_RUN=32', color='cyan', linewidth=3)
+    plt.plot(x, data_powersort_with_insertion_sort, label=f'Powersort with MIN_RUN={MIN_RUN}', color='cyan', linewidth=3)
 
     if xlog:
         plt.xscale('log')

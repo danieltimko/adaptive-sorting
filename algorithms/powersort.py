@@ -11,7 +11,7 @@ def powersort(arr: List[T], min_run_length: int | None = None) -> List[T]:
     Sorts the input list using Powersort algorithm.
 
     This implementation can leverage the same optimization techniques as Timsort (timsort.py):
-    MIN_RUN=32, binary insertion sort, galloping mode (TODO)
+    MIN_RUN, binary insertion sort, galloping mode (TODO)
 
     :param arr: Input sequence to sort
     :param min_run_length: (optional) Minimal length of runs to enforce (and use binary insertion sort for shorter runs)
