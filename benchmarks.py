@@ -285,7 +285,7 @@ def _benchmark_entropy(config_name: str, entropy_interval: Tuple[float, float]) 
     results = {}
     for arr_sizes in SIZE_CONFIGURATIONS:
         for arr_size in arr_sizes:
-            print(f"Running RUNS benchmark ({config_name}) for N={arr_size}")
+            print(f"Running ENTROPY benchmark ({config_name}) for N={arr_size}")
             # Set the value range to (0, N*100)
             # Not really important as long as the "high" value is reasonably large (=> not too many equal values).
             bounds = (0, arr_size * 100)
@@ -325,9 +325,9 @@ def run_all_benchmarks() -> None:
     Executes all the benchmarks with all the input configurations defined in `config.py`.
     Note: This might take a very long time (hours), depending on the configured settings.
     """
-    benchmark_minrun_impact()
+    # benchmark_minrun_impact()
     # benchmark_random()
-    # benchmark_runs()
+    benchmark_runs()
     # benchmark_entropy()
 
 
