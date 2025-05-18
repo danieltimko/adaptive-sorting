@@ -6,15 +6,21 @@ from algorithms.commons import merge, find_next_run, Run
 T = TypeVar('T')
 
 
-def powersort(arr: List[T], min_run_length: int | None = None) -> List[T]:
+def powersort(arr: List[T], min_run_length: int | None = None, galloping_enabled: bool = False,
+              galloping_dynamic_threshold_enabled: bool = False) -> List[T]:
     """
     Sorts the input list using Powersort algorithm.
 
     This implementation can leverage the same optimization techniques as Timsort (timsort.py):
-    MIN_RUN, binary insertion sort, galloping mode (TODO)
+    MIN_RUN, binary insertion sort, galloping mode.
+    They are implemented as optional, in order to be able to test the performance of Powersort with and without them.
 
     :param arr: Input sequence to sort
     :param min_run_length: (optional) Minimal length of runs to enforce (and use binary insertion sort for shorter runs)
+    :param galloping_enabled: (optional) Whether entering the galloping mode is enabled or not; Default: false
+    :param galloping_dynamic_threshold_enabled: (optional) Whether dynamic tuning of the galloping threshold
+        is enabled or not; If true, the threshold decreases with every successful gallop, and decreases with every
+        unsuccessful one. If false, the threshold stays always the same. Default: false
     :return: Sorted sequence (increasing)
     """
 
@@ -28,13 +34,13 @@ def powersort(arr: List[T], min_run_length: int | None = None) -> List[T]:
         while P and P[-1] > p:
             P.pop()
             r0 = X.pop()  # previous run on the stack
-            r1 = merge(arr, r0.start, r0.end, r1.end)
+            r1 = merge(arr, r0.start, r0.end, r1.end, galloping_enabled, galloping_dynamic_threshold_enabled)
         X.append(r1)
         P.append(p)
         r1 = r2
     while X:
         r0 = X.pop()
-        r1 = merge(arr, r0.start, r0.end, r1.end)
+        r1 = merge(arr, r0.start, r0.end, r1.end, galloping_enabled, galloping_dynamic_threshold_enabled)
     return arr
 
 

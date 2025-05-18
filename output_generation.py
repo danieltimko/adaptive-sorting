@@ -5,7 +5,7 @@ from matplotlib.ticker import PercentFormatter
 import matplotlib.pyplot as plt
 import numpy as np
 
-from config import MIN_RUN
+from config import MIN_RUN, INITIAL_GALLOPING_THRESHOLD
 
 """
 Type alias for the benchmark results
@@ -35,8 +35,6 @@ def save_to_csv(results: TResults, file_name: str) -> None:
                          'Timsort [%]',
                          'Powersort [%]',
                          'Python .sort() [%]',
-                         # TODO add number of samples/datapoints?
-                         # TODO or add all datapoints to csv, before aggregating them
                          ])
         for arr_size, data in results.items():
             writer.writerow([arr_size, *data])
@@ -67,6 +65,51 @@ def plot_minrun_results(data: Dict[int, Tuple[int, float]], x_label: str, y_labe
 
     plt.plot(x, data_powersort_without_insertion_sort, label='Powersort without MIN_RUN', color='orange', linewidth=3)
     plt.plot(x, data_powersort_with_insertion_sort, label=f'Powersort with MIN_RUN={MIN_RUN}', color='cyan', linewidth=3)
+
+    if xlog:
+        plt.xscale('log')
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(xmax=1))
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(title)
+    plt.legend()
+    plt.savefig(f'./output/graphs/{file_name}.png')
+    if show:
+        plt.show()
+
+
+def plot_galloping_results(data: Dict[int, Tuple[int, float, float]], x_label: str, y_label: str,
+                           title: str, file_name: str, xlog: bool = False, show: bool = False) -> None:
+    """
+    Generates a plot visualization for the galloping benchmark and saves it as a PNG file in the output directory.
+
+    :param data: Benchmark results - {array size: (results_without_galloping, results_with_galloping_static_threshold,
+        results_with_galloping_dynamic_threshold)}
+        Results values are relative difference [%] from the baseline (results_without_galloping).
+        Therefore, results_without_galloping is always 0.0.
+    :param x_label: Label for the X axis (array size)
+    :param y_label: Label for the Y axis (% diff)
+    :param title: Title of the plot
+    :param file_name: Name of the output PNG file
+    :param xlog: Whether to use logarithmic scale for the X axis. Useful when the experiment is performed in such a way
+        that the datapoints for lower x values are much denser, and the datapoints for higher x values are more sparse.
+    :param show: Whether to show (open) the generated plot; Useful for debugging purposes.
+    :return: None; Side effect: PNG file with the generated plot
+    """
+
+    plt.figure(figsize=(10, 6))
+    x = list(data.keys())
+    data_powersort_without_galloping = [v[0] for v in data.values()]
+    data_powersort_with_galloping_static = [v[1] for v in data.values()]
+    data_powersort_with_galloping_dynamic = [v[2] for v in data.values()]
+
+    plt.plot(x, data_powersort_without_galloping, label='Powersort without galloping', color='orange', linewidth=3)
+    plt.plot(x, data_powersort_with_galloping_static,
+             label=f'Powersort with galloping (static threshold, always {INITIAL_GALLOPING_THRESHOLD})',
+             color='cyan', linewidth=3)
+    plt.plot(x, data_powersort_with_galloping_dynamic,
+             label=f'Powersort with galloping (dynamic threshold, initial {INITIAL_GALLOPING_THRESHOLD})',
+             color='green', linewidth=3)
 
     if xlog:
         plt.xscale('log')
@@ -115,7 +158,6 @@ def plot_results(data: TResults, x_label: str, y_label: str, title: str,
 
     if fit_to_poly:
         try:
-            # TODO play with 'deg' parameter; rn plots are too smooth on the first half of X axis (problem with xlog?)
             poly_merge_sort = np.poly1d(np.polyfit(x, data_merge_sort, 5))
             poly_natural_merge_sort = np.poly1d(np.polyfit(x, data_natural_merge_sort, 5))
             poly_timsort = np.poly1d(np.polyfit(x, data_timsort, 5))

@@ -28,10 +28,8 @@ def generate_random_list(n: int, bounds: Tuple[int, int], number_of_runs: int | 
             profiles = []
             # it could happen that we don't find run with desired entropy => try different n_runs
             while not profiles:
-                # TODO avg run size is 4 with this, change to //32 ? This might change the results
                 n_runs = random.randint(2, n // 2)
                 min_entropy, max_entropy = _calc_entropy_bounds(n_runs, n)
-                # TODO add option to iterate from other direction too? for faster execution of benchmarks
                 for profile in _generate_profiles_with_increasing_entropy(n_runs, n):
                     entropy = round(_calc_entropy(profile), 4)
                     normalized_entropy = (entropy - min_entropy) / (max_entropy - min_entropy)

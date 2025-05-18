@@ -10,7 +10,7 @@ Tuning remarks:
 """
 
 # The number of inputs/datapoints for each input size
-N_SAMPLES = 5   # TODO increase
+N_SAMPLES = 10
 
 """
 Configures what input sizes should be considered for the benchmark inputs.
@@ -20,7 +20,7 @@ SIZE_CONFIGURATIONS = [
     # [n for n in range(100, 1000, 100)],
     [n for n in range(1000, 10_000, 1000)],
     [n for n in range(10_000, 100_001, 10_000)],
-    # [n for n in range(100_000, 1_000_001, 100_000)]  # do not use for entropy benchmark
+    [n for n in range(100_000, 1_000_001, 100_000)]  # do not use for entropy benchmark
 ]
 
 """
@@ -29,10 +29,10 @@ The values in this dictionary represent the average run length.
 A separate plot is generated for each of the categories.
 """
 RUNS_CONFIGURATIONS = {
-    # "random": 2,                # N/2 runs
+    "random": 2,                # N/2 runs
     "slightly_presorted": 10,   # N/10 runs
-    # "presorted": 100,           # N/100 runs
-    # "heavily_presorted": 1000,  # N/1000 runs
+    "presorted": 100,             # N/100 runs
+    "heavily_presorted": 1000,  # N/1000 runs
 }
 
 """
@@ -48,3 +48,6 @@ ENTROPY_CONFIGURATIONS = {
 
 # Minimum run length constant for Timsort and Powersort
 MIN_RUN = 32
+
+# Initial threshold to trigger the galloping mode (7 is standard and used in CPython)
+INITIAL_GALLOPING_THRESHOLD = 7

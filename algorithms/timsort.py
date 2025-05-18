@@ -14,11 +14,21 @@ def timsort(arr: List[T]) -> List[T]:
     Note that this implementation of Timsort does not include *all* performance
     optimizations proposed by Tim Peters.
     See https://svn.python.org/projects/python/trunk/Objects/listsort.txt
-    The implemented optimizations: MIN_RUN, binary insertion sort, galloping mode (TODO)
+    The implemented optimizations: MIN_RUN, binary insertion sort, galloping mode
 
     :param arr: Input sequence to sort
     :return: Sorted sequence (increasing)
     """
+    def merge12():
+        # Merge r1 and r2
+        S.pop(), S.pop()
+        S.append(merge(arr, r2.start, r2.end, r1.end, galloping_enabled=True))
+
+    def merge23():
+        # Merge r2 and r3
+        S.pop(), S.pop(), S.pop()
+        S.append(merge(arr, r3.start, r3.end, r2.end, galloping_enabled=True))
+        S.append(r1)
 
     runs = find_runs(arr, min_run_length=MIN_RUN)
     S = []
@@ -31,17 +41,6 @@ def timsort(arr: List[T]) -> List[T]:
             r3 = S[-3] if h >= 3 else None
             r4 = S[-4] if h >= 4 else None
 
-            def merge12():
-                # Merge r1 and r2
-                S.pop(), S.pop()
-                S.append(merge(arr, r2.start, r2.end, r1.end))
-
-            def merge23():
-                # Merge r2 and r3
-                S.pop(), S.pop(), S.pop()
-                S.append(merge(arr, r3.start, r3.end, r2.end))
-                S.append(r1)
-
             # Merging on-the-fly
             if h >= 3 and len(r1) >= len(r3):
                 merge23()
@@ -53,7 +52,8 @@ def timsort(arr: List[T]) -> List[T]:
                 merge12()
             else:
                 break
+
     while len(S) > 1:
         r1, r2 = S.pop(), S.pop()
-        S.append(merge(arr, r2.start, r2.end, r1.end))
+        S.append(merge(arr, r2.start, r2.end, r1.end, galloping_enabled=True))
     return arr

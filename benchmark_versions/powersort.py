@@ -13,7 +13,9 @@ from benchmark_versions.commons import merge, find_next_run, Run
 T = TypeVar('T')
 
 
-def powersort(arr: List[T], min_run_length: int | None = None) -> Tuple[List[T], int]:
+def powersort(arr: List[T], min_run_length: int | None = None,
+              galloping_enabled: bool = False,
+              galloping_dynamic_threshold_enabled: bool = False) -> Tuple[List[T], int]:
     n = len(arr)
     X = []
     P = []
@@ -25,14 +27,14 @@ def powersort(arr: List[T], min_run_length: int | None = None) -> Tuple[List[T],
         while P and P[-1] > p:
             P.pop()
             r0 = X.pop()  # previous run on the stack
-            r1, diff = merge(arr, r0.start, r0.end, r1.end)
+            r1, diff = merge(arr, r0.start, r0.end, r1.end, galloping_enabled, galloping_dynamic_threshold_enabled)
             comparisons += diff
         X.append(r1)
         P.append(p)
         r1 = r2
     while X:
         r0 = X.pop()
-        r1, diff = merge(arr, r0.start, r0.end, r1.end)
+        r1, diff = merge(arr, r0.start, r0.end, r1.end, galloping_enabled, galloping_dynamic_threshold_enabled)
         comparisons += diff
     return arr, comparisons
 

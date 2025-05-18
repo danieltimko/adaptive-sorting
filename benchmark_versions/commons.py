@@ -7,6 +7,8 @@ check the original algorithms in the algorithms directory.
 
 from typing import TypeVar, List, Tuple
 
+from config import INITIAL_GALLOPING_THRESHOLD
+
 # Generic type of elements in the input list
 T = TypeVar('T')
 
@@ -90,22 +92,73 @@ def binary_search(arr: List[T], val: T, start: int, end: int) -> Tuple[int, int]
     return start, comparisons
 
 
-def merge(arr: List[T], l: int, m: int, r: int) -> Tuple[Run, int]:
+def merge(arr: List[T], l: int, m: int, r: int,
+          galloping_enabled: bool = False,
+          galloping_dynamic_threshold_enabled: bool = False) -> Tuple[Run, int]:
     comparisons = 0
     left = arr[l:m+1]     # first run
     right = arr[m+1:r+1]  # second run
     k = l  # index in the original array
     i = 0  # index in the first run
     j = 0  # index in the second run
+
+    galloping_threshold = INITIAL_GALLOPING_THRESHOLD  # initial threshold to trigger the galloping mode
+    win_count = 0  # how many times consecutively was the element picked from the same run (winning run)
+    left_winning = True  # whether it was the left or the right run
+
     while i < len(left) and j < len(right):
         if left[i] <= right[j]:
             arr[k] = left[i]
             i += 1
+            if left_winning:
+                win_count += 1
+            else:
+                win_count = 1
+                left_winning = True
         else:
             arr[k] = right[j]
             j += 1
+            if left_winning:
+                win_count = 1
+                left_winning = False
+            else:
+                win_count += 1
         k += 1
         comparisons += 1
+
+        # Do not start galloping if one of the runs is already exhausted
+        if i >= len(left) or j >= len(right):
+            break
+
+        # Trigger galloping mode?
+        if galloping_enabled and win_count >= galloping_threshold:
+            if left_winning:
+                # Gallop in left run
+                idx, diff = _gallop(left, i, right[j], True)
+                galloped = idx - i
+                while i < idx:
+                    arr[k] = left[i]
+                    i += 1
+                    k += 1
+            else:
+                # Gallop in right run
+                idx, diff = _gallop(right, j, left[i], False)
+                galloped = idx - j
+                while j < idx:
+                    arr[k] = right[j]
+                    j += 1
+                    k += 1
+            win_count = 0
+            comparisons += diff
+
+            # Adaptive tuning of the galloping threshold (based on the number of galloped items)
+            if galloping_dynamic_threshold_enabled:
+                if galloped >= galloping_threshold:
+                    galloping_threshold = max(1, galloping_threshold - 1)
+                else:
+                    galloping_threshold += 2
+
+    # Final copying
     while i < len(left):
         arr[k] = left[i]
         i += 1
@@ -115,3 +168,30 @@ def merge(arr: List[T], l: int, m: int, r: int) -> Tuple[Run, int]:
         j += 1
         k += 1
     return Run(l, r), comparisons
+
+
+def _gallop(run, start, val, incl_eq):
+    l = start
+    r = len(run)
+    if l == r:
+        return l, 0
+    if (incl_eq and run[l] > val) or (not incl_eq and run[l] >= val):
+        return l, 1
+    comparisons = 1
+    # Exponential search
+    size = 1
+    while l+size < r and ((incl_eq and run[l+size] <= val) or (not incl_eq and run[l+size] < val)):
+        size *= 2
+        comparisons += 1
+    comparisons += 1
+    l += size//2
+    r = min(l+size, r)
+    # Binary search
+    while l < r:
+        mid = (l+r) // 2
+        comparisons += 1
+        if (incl_eq and run[mid] <= val) or (not incl_eq and run[mid] < val):
+            l = mid + 1
+        else:
+            r = mid
+    return r, comparisons

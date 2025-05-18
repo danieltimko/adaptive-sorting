@@ -7,7 +7,7 @@ from benchmark_versions.timsort import timsort
 from benchmark_versions.powersort import powersort
 from config import SIZE_CONFIGURATIONS, N_SAMPLES, RUNS_CONFIGURATIONS, ENTROPY_CONFIGURATIONS, MIN_RUN
 
-from output_generation import plot_results, plot_minrun_results, save_to_csv
+from output_generation import plot_results, plot_minrun_results, save_to_csv, plot_galloping_results
 from random_input_generators import generate_random_list
 
 
@@ -103,20 +103,25 @@ def run_timsort(arr: List[T]) -> Tuple[TResult, float]:
 
 
 @timeit
-def run_powersort(arr: List, min_run_length: int | None = MIN_RUN) -> Tuple[List, int]:
+def run_powersort(arr: List, min_run_length: int | None = MIN_RUN,
+                  galloping_enabled: bool = True,
+                  galloping_dynamic_threshold_enabled: bool = True) -> Tuple[TResult, float]:
     """
     Runs the benchmark version of Powersort and measures its CPU execution time.
 
     :param arr: Input sequence to sort
     :param min_run_length: (optional) Minimal length of runs to enforce; Default: 32
+    :param galloping_enabled: (optional) Whether galloping mode is enabled or not; Default: true
+    :param galloping_dynamic_threshold_enabled: (optional) Whether dynamic tuning of the galloping threshold
+        is enabled or not; Default: true
     :return: Sorted input along with the number of performed comparisons, along with the execution time [ms]
     """
 
-    return powersort(arr, min_run_length)
+    return powersort(arr, min_run_length, galloping_enabled, galloping_dynamic_threshold_enabled)
 
 
 @timeit
-def run_natural_merge_sort(arr: List) -> Tuple[List, int]:
+def run_natural_merge_sort(arr: List) -> Tuple[TResult, float]:
     """
     Runs the benchmark version of Natural Merge Sort and measures its CPU execution time.
 
@@ -128,7 +133,7 @@ def run_natural_merge_sort(arr: List) -> Tuple[List, int]:
 
 
 @timeit
-def run_merge_sort(arr: List) -> Tuple[List, int]:
+def run_merge_sort(arr: List) -> Tuple[TResult, float]:
     """
     Runs the benchmark version of Merge Sort and measures its CPU execution time.
 
@@ -166,6 +171,40 @@ def benchmark_minrun_impact() -> None:
     plot_minrun_results(results, "Array size", "# of key comparisons [% diff]",
                         "Performance impact of MIN_RUN and using insertion sort for small runs",
                         "minrun_impact_comparisons", xlog=True)
+
+
+def benchmark_galloping_impact() -> None:
+    """
+    Runs the benchmark for galloping impact in Powersort.
+    Measures the performance difference between the Powersort version that uses galloping and the one that does not.
+
+    Plots the results in `output/graphs/galloping_impact_comparisons.png`
+    """
+
+    results = {}
+    n_runs = 200
+    for arr_sizes in SIZE_CONFIGURATIONS:
+        for arr_size in arr_sizes:
+            print(f"Running GALLOPING benchmark for N={arr_size}")
+            # Set the value range to (0, N*100)
+            # Not really important as long as the "high" value is reasonably large (=> not too many equal values).
+            bounds = (0, arr_size*100)
+            sum_with_static = 0
+            sum_with_dynamic = 0
+            for _ in range(N_SAMPLES):
+                arr = generate_random_list(arr_size, bounds, number_of_runs=arr_size//n_runs)
+                (_, n_without), _ = run_powersort(arr.copy(), galloping_enabled=False)
+                (_, n_with_static), _ = run_powersort(arr.copy(), galloping_enabled=True,
+                                                      galloping_dynamic_threshold_enabled=False)
+                (_, n_with_dynamic), _ = run_powersort(arr.copy(), galloping_enabled=True,
+                                                       galloping_dynamic_threshold_enabled=True)
+                sum_with_static += (n_with_static-n_without)/n_without
+                sum_with_dynamic += (n_with_dynamic-n_without)/n_without
+            results[arr_size] = (0, sum_with_static/N_SAMPLES, sum_with_dynamic/N_SAMPLES)
+
+    plot_galloping_results(results, "Array size", "# of key comparisons [% diff]",
+                           f"Performance impact of galloping (number of runs is N/{n_runs})",
+                           "galloping_impact_comparisons", xlog=True)
 
 
 def benchmark_random() -> None:
@@ -326,8 +365,9 @@ def run_all_benchmarks() -> None:
     Note: This might take a very long time (hours), depending on the configured settings.
     """
     # benchmark_minrun_impact()
+    # benchmark_galloping_impact()
     # benchmark_random()
-    benchmark_runs()
+    # benchmark_runs()
     # benchmark_entropy()
 
 
