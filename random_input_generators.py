@@ -28,10 +28,8 @@ def generate_random_list(n: int, bounds: Tuple[int, int], number_of_runs: int | 
             profiles = []
             # it could happen that we don't find run with desired entropy => try different n_runs
             while not profiles:
-                # TODO avg run size is 4 with this, change to //32 ? This might change the results
                 n_runs = random.randint(2, n // 2)
                 min_entropy, max_entropy = _calc_entropy_bounds(n_runs, n)
-                # TODO add option to iterate from other direction too? for faster execution of benchmarks
                 for profile in _generate_profiles_with_increasing_entropy(n_runs, n):
                     entropy = round(_calc_entropy(profile), 4)
                     normalized_entropy = (entropy - min_entropy) / (max_entropy - min_entropy)
@@ -50,8 +48,7 @@ def generate_random_list(n: int, bounds: Tuple[int, int], number_of_runs: int | 
                     first_bounds = (bounds[0], arr[-1]-1)
                 else:
                     first_bounds = (arr[-1]+1, bounds[1])
-            run = _generate_random_run(prof[i], bounds, first_bounds)
-            last_increasing = run[1] >= run[0]
+            run, last_increasing = _generate_random_run(prof[i], bounds, first_bounds)
             arr.extend(run)
         return arr
     return np.random.randint(bounds[0], bounds[1], n).tolist()
@@ -126,12 +123,14 @@ def _generate_profiles_with_increasing_entropy(k: int, n: int) -> Generator:
     while prof[i] < prof[-1]:
         prof[i] += 1
         prof[-1] -= 1
-        yield prof  # TODO should use .copy() for the final version. Ignore for now to speed up the benchmarks.
+        # The profile is never mutated. Therefore, .copy() can be omitted for faster execution of the benchmarks
+        # yield prof.copy()
+        yield prof
         i = (i+1) % (k-1)
 
 
 def _generate_random_run(n: int, bounds: Tuple[int, int],
-                         first_bounds: Tuple[int, int]) -> List[int]:
+                         first_bounds: Tuple[int, int]) -> Tuple[List[int], bool]:
     """
     Generates a random run (increasing or decreasing) with the specified length,
     respecting given restrictions for its values.
@@ -140,12 +139,12 @@ def _generate_random_run(n: int, bounds: Tuple[int, int],
     :param bounds: (low, high) Allowed value range for the run's elements
     :param first_bounds: (low, high) Allowed value range for the first element of the run.
         The first element has to satisfy separate value restrictions in order to interrupt the previous run.
-    :return: Randomly generated run
+    :return: Randomly generated run, along with a boolean marking whether the run is increasing
     """
 
     first = random.randint(first_bounds[0], first_bounds[1])
     while True:
-        increasing = random.randint(0, 1)
+        increasing = bool(random.randint(0, 1))
         if increasing:
             new_bounds = (first, bounds[1])
         else:
@@ -157,4 +156,4 @@ def _generate_random_run(n: int, bounds: Tuple[int, int],
         rest = sorted(np.random.randint(bounds[0], bounds[1]+1, n-1), reverse=not increasing)
         if any(e != first for e in rest):
             break
-    return [first] + rest
+    return [first] + rest, increasing

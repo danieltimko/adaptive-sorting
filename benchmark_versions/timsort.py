@@ -15,6 +15,23 @@ T = TypeVar('T')
 
 
 def timsort(arr: List[T]) -> Tuple[List[T], int]:
+    def merge12() -> int:
+        # Merge r1 and r2
+        S.pop(), S.pop()
+        r, diff = merge(arr, r2.start, r2.end, r1.end,
+                        galloping_enabled=True, galloping_dynamic_threshold_enabled=True)
+        S.append(r)
+        return diff
+
+    def merge23() -> int:
+        # Merge r2 and r3
+        S.pop(), S.pop(), S.pop()
+        r, diff = merge(arr, r3.start, r3.end, r2.end,
+                        galloping_enabled=True, galloping_dynamic_threshold_enabled=True)
+        S.append(r)
+        S.append(r1)
+        return diff
+
     runs, comparisons = find_runs(arr, min_run_length=MIN_RUN)
     S = []
     for run in runs:
@@ -25,21 +42,6 @@ def timsort(arr: List[T]) -> Tuple[List[T], int]:
             r2 = S[-2] if h >= 2 else None
             r3 = S[-3] if h >= 3 else None
             r4 = S[-4] if h >= 4 else None
-
-            def merge12() -> int:
-                # Merge r1 and r2
-                S.pop(), S.pop()
-                r, diff = merge(arr, r2.start, r2.end, r1.end)
-                S.append(r)
-                return diff
-
-            def merge23() -> int:
-                # Merge r2 and r3
-                S.pop(), S.pop(), S.pop()
-                r, diff = merge(arr, r3.start, r3.end, r2.end)
-                S.append(r)
-                S.append(r1)
-                return diff
 
             # Merging on-the-fly
             if h >= 3 and len(r1) >= len(r3):
@@ -52,9 +54,11 @@ def timsort(arr: List[T]) -> Tuple[List[T], int]:
                 comparisons += merge12()
             else:
                 break
+
     while len(S) > 1:
         r1, r2 = S.pop(), S.pop()
-        run, diff = merge(arr, r2.start, r2.end, r1.end)
+        run, diff = merge(arr, r2.start, r2.end, r1.end,
+                          galloping_enabled=True, galloping_dynamic_threshold_enabled=True)
         comparisons += diff
         S.append(run)
     return arr, comparisons
