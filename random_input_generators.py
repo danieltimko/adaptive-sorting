@@ -123,7 +123,9 @@ def _generate_profiles_with_increasing_entropy(k: int, n: int) -> Generator:
     while prof[i] < prof[-1]:
         prof[i] += 1
         prof[-1] -= 1
-        yield prof  # TODO should use .copy() for the final version. Ignore for now to speed up the benchmarks.
+        # The profile is never mutated. Therefore, .copy() can be omitted for faster execution of the benchmarks
+        # yield prof.copy()
+        yield prof
         i = (i+1) % (k-1)
 
 

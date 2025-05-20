@@ -1,4 +1,4 @@
-from typing import TypeVar, List
+from typing import TypeVar, List, Tuple
 
 from config import INITIAL_GALLOPING_THRESHOLD
 
@@ -189,7 +189,7 @@ def merge(arr: List[T], l: int, m: int, r: int, galloping_enabled: bool = False,
         if galloping_enabled and win_count >= galloping_threshold:
             if left_winning:
                 # Gallop in left run
-                idx = _gallop(left, i, right[j], True)
+                idx, comparisons = _gallop(left, i, right[j], True)
                 galloped = idx - i
                 while i < idx:
                     arr[k] = left[i]
@@ -197,7 +197,7 @@ def merge(arr: List[T], l: int, m: int, r: int, galloping_enabled: bool = False,
                     k += 1
             else:
                 # Gallop in right run
-                idx = _gallop(right, j, left[i], False)
+                idx, comparisons = _gallop(right, j, left[i], False)
                 galloped = idx - j
                 while j < idx:
                     arr[k] = right[j]
@@ -207,10 +207,10 @@ def merge(arr: List[T], l: int, m: int, r: int, galloping_enabled: bool = False,
 
             # Adaptive tuning of the galloping threshold (based on the number of galloped items)
             if galloping_dynamic_threshold_enabled:
-                if galloped >= galloping_threshold:
+                if galloped >= comparisons:
                     galloping_threshold = max(1, galloping_threshold - 1)
                 else:
-                    galloping_threshold += 2
+                    galloping_threshold += 1
 
     # Final copying
     while i < len(left):
@@ -224,7 +224,7 @@ def merge(arr: List[T], l: int, m: int, r: int, galloping_enabled: bool = False,
     return Run(l, r)
 
 
-def _gallop(run: List[T], start: int, val: T, incl_eq: bool) -> int:
+def _gallop(run: List[T], start: int, val: T, incl_eq: bool) -> Tuple[int, int]:
     """
     Enters galloping mode and finds the correct position for a given element, using two-step search.
     First, exponential search is used to find the correct interval of size 2^x. Next, binary search
@@ -235,27 +235,31 @@ def _gallop(run: List[T], start: int, val: T, incl_eq: bool) -> int:
     :param val: Value to find the correct position for in the run
     :param incl_eq: Whether elements equal to `val` should be also galloped over or not. If true,
         then `val` will be placed to the right of these elements. If false, then to the left.
-    :return: The correct position index for `val`
+    :return: The correct position index for `val`, along with the number of performed comparisons
     """
     l = start
     r = len(run)
     if l == r:
-        return l
+        return l, 0
     if (incl_eq and run[l] > val) or (not incl_eq and run[l] >= val):
-        return l
+        return l, 1
 
+    comparisons = 1
     # Exponential search
     size = 1
     while l+size < r and ((incl_eq and run[l+size] <= val) or (not incl_eq and run[l+size] < val)):
         size *= 2
+        comparisons += 1
+    comparisons += 1
     l += size//2
     r = min(l+size, r)
 
     # Binary search
     while l < r:
         mid = (l+r) // 2
+        comparisons += 1
         if (incl_eq and run[mid] <= val) or (not incl_eq and run[mid] < val):
             l = mid + 1
         else:
             r = mid
-    return r
+    return r, comparisons

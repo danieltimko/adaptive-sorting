@@ -16,7 +16,7 @@ also included in the benchmarks.
 - `config.py` - Configurations for the input data to run the benchmarks on
 - `random_input_generators.py` - Functions generating random inputs with desired properties (size, level of presortedness, etc.)
 - `output_generation.py` - Functions generating the benchmark outputs and visualizations
-- `benchmarks.py` - The main class defining and executing the benchmarks
+- `benchmarks.py` - The main code defining and executing the benchmarks
 - `requirements.txt` - Python packages required to run the code
 
 ## How to run

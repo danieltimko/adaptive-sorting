@@ -364,11 +364,11 @@ def run_all_benchmarks() -> None:
     Executes all the benchmarks with all the input configurations defined in `config.py`.
     Note: This might take a very long time (hours), depending on the configured settings.
     """
-    # benchmark_minrun_impact()
-    # benchmark_galloping_impact()
-    # benchmark_random()
-    # benchmark_runs()
-    # benchmark_entropy()
+    benchmark_minrun_impact()
+    benchmark_galloping_impact()
+    benchmark_random()
+    benchmark_runs()
+    benchmark_entropy()
 
 
 if __name__ == '__main__':

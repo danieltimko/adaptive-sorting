@@ -153,10 +153,10 @@ def merge(arr: List[T], l: int, m: int, r: int,
 
             # Adaptive tuning of the galloping threshold (based on the number of galloped items)
             if galloping_dynamic_threshold_enabled:
-                if galloped >= galloping_threshold:
+                if galloped >= diff:
                     galloping_threshold = max(1, galloping_threshold - 1)
                 else:
-                    galloping_threshold += 2
+                    galloping_threshold += 1
 
     # Final copying
     while i < len(left):
@@ -170,7 +170,7 @@ def merge(arr: List[T], l: int, m: int, r: int,
     return Run(l, r), comparisons
 
 
-def _gallop(run, start, val, incl_eq):
+def _gallop(run: List[T], start: int, val: T, incl_eq: bool) -> Tuple[int, int]:
     l = start
     r = len(run)
     if l == r:
